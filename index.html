@@ -300,6 +300,52 @@
       border-radius: 10px;
       line-height: 1.5;
     }
+    .assistant-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 220px;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .chat {
+      min-height: 210px;
+      max-height: 380px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--cp-border);
+      border-radius: 10px;
+      background: var(--cp-bg-elevated);
+    }
+    .message {
+      max-width: 88%;
+      padding: 10px 12px;
+      border: 1px solid var(--cp-border);
+      border-radius: 10px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .message.assistant { align-self: flex-start; background: var(--cp-surface); }
+    .message.user {
+      align-self: flex-end;
+      background: var(--cp-accent-soft);
+      border-color: var(--cp-accent);
+    }
+    .message-role {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--cp-text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .ask-row { display: flex; gap: 8px; margin-top: 10px; }
+    .ask-row input { flex: 1; }
+    .prompt-list { display: grid; gap: 8px; align-content: start; }
+    .prompt-list .btn { text-align: left; white-space: normal; }
+    .assistant-note { margin-top: 10px; color: var(--cp-text-muted); font-size: 11px; }
     .estimator {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -362,6 +408,8 @@
       .assessment-head { grid-template-columns: 1fr; gap: 8px; }
       .checks { grid-template-columns: 1fr; }
       .estimator { grid-template-columns: 1fr; }
+      .assistant-layout { grid-template-columns: 1fr; }
+      .message { max-width: 96%; }
     }
     @media print {
       .sidebar, .topbar, .no-print, dialog { display: none !important; }
@@ -433,6 +481,24 @@
             </div>
             <div class="field section-gap"><label for="outcomes">Business outcomes</label><textarea id="outcomes" placeholder="Reduce platform complexity, improve freshness, consolidate analytics..."></textarea></div>
             <div class="field section-gap"><label for="constraints">Known constraints</label><textarea id="constraints" placeholder="Data residency, private networking, fixed reporting windows, specialist skills..."></textarea></div>
+          </div>
+          <div class="card section-gap">
+            <h3>Ask the readiness assistant</h3>
+            <div class="card-sub">Get contextual guidance from the information entered in this assessment.</div>
+            <div class="assistant-layout">
+              <div>
+                <div class="chat" id="assistantChat" aria-live="polite"></div>
+                <form class="ask-row" id="assistantForm">
+                  <input id="assistantQuestion" aria-label="Question for the readiness assistant" placeholder="Ask about migration risks, target patterns, capacity, or next steps..." autocomplete="off">
+                  <button class="btn primary" type="submit">Ask</button>
+                </form>
+                <div class="assistant-note">Guided local assistant · No customer data leaves this browser · Validate recommendations against current Fabric documentation.</div>
+              </div>
+              <div>
+                <div class="field"><label>Suggested questions</label></div>
+                <div class="prompt-list" id="suggestedQuestions"></div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -574,13 +640,14 @@
         {id:"w5",name:"Telemetry stream",type:"Spark jobs",size:1900,refresh:1440,concurrency:20,complexity:"Medium",features:["streaming"],notes:"Near-real-time operational dashboard."},
         {id:"w6",name:"Order warehouse",type:"Azure SQL",size:1200,refresh:24,concurrency:80,complexity:"Medium",features:["cdc","private-network"],notes:"Operational replica used for analytics."},
         {id:"w7",name:"Exception notifications",type:"Logic Apps",size:5,refresh:350,concurrency:10,complexity:"Medium",features:["stateful"],notes:"Long-running approval and notification flow."}
-      ]
+      ],
+      conversation: []
     };
     let state = loadState();
     let currentView = "discovery";
 
     function emptyState() {
-      return {context:{customerName:"",industry:"",region:"UK South",targetDate:"",users:250,concurrentUsers:40,governance:"2",strategy:"Balanced",outcomes:"",constraints:""},workloads:[]};
+      return {context:{customerName:"",industry:"",region:"UK South",targetDate:"",users:250,concurrentUsers:40,governance:"2",strategy:"Balanced",outcomes:"",constraints:""},workloads:[],conversation:[]};
     }
     function loadState() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || emptyState(); }
@@ -681,6 +748,92 @@
       return {status, pattern, risks, optimisations:[...new Set(optimisations)], questions};
     }
     function allAssessments() { return state.workloads.map(w => ({workload:w, ...assess(w)})); }
+    function discoveryGaps() {
+      const labels = {
+        customerName:"customer name", industry:"industry", targetDate:"target migration date",
+        outcomes:"business outcomes", constraints:"known constraints"
+      };
+      return Object.entries(labels).filter(([key]) => !String(state.context[key] || "").trim()).map(([,label]) => label);
+    }
+    function answerQuestion(question) {
+      readContext();
+      const q = question.toLowerCase();
+      const assessments = allAssessments();
+      const blocked = assessments.filter(a => a.status === "blocked");
+      const optimise = assessments.filter(a => a.status === "optimize");
+      const patterns = [...new Set(assessments.map(a => a.pattern))];
+      const gaps = discoveryGaps();
+      const customer = state.context.customerName || "this customer";
+
+      if (/missing|gap|discover|ask next|question/.test(q)) {
+        if (gaps.length) return `Complete ${gaps.join(", ")} first. Then confirm workload owners, business SLAs, peak processing windows, data residency, private connectivity, source-control maturity, and acceptance criteria.`;
+        const followUps = [...new Set(assessments.flatMap(a => a.questions))].slice(0, 4);
+        return followUps.length
+          ? `The highest-value follow-up questions are:\n• ${followUps.join("\n• ")}`
+          : "Add representative workloads next. For each one, capture scale, run frequency, concurrency, dependencies, ownership, and service-level objectives.";
+      }
+      if (/block|risk|redesign|unsupported/.test(q)) {
+        if (!assessments.length) return "No workloads have been added yet, so I cannot identify technical blockers. Add the highest-value and most complex workloads first.";
+        if (!blocked.length) return `No explicit blocker is currently flagged. ${optimise.length} workload${optimise.length === 1 ? " needs" : "s need"} optimisation or validation, especially around scale, networking, compatibility, and peak overlap.`;
+        return `${blocked.length} workload${blocked.length === 1 ? " has" : "s have"} a redesign signal:\n${blocked.map(a => `• ${a.workload.name}: ${a.risks.join(" ")}`).join("\n")}`;
+      }
+      if (/pattern|architecture|lakehouse|warehouse|direct lake|target/.test(q)) {
+        if (!patterns.length) return "Add workloads before selecting a target pattern. Fabric architecture should follow workload behavior rather than defaulting the whole estate to one storage or serving pattern.";
+        return `The current estate maps to these target patterns:\n• ${patterns.join("\n• ")}\nUse a phased architecture: prove one low-risk path, retain external services where Fabric is not the right runtime, and standardise governance across the shared data estate.`;
+      }
+      if (/capacity|sku|size|cost|estimator|performance/.test(q)) {
+        const totalGb = state.workloads.reduce((sum,w) => sum + Number(w.size || 0), 0);
+        const runs = state.workloads.reduce((sum,w) => sum + Number(w.refresh || 0), 0);
+        const overlaps = state.workloads.filter(w => w.features.includes("high-overlap")).length;
+        return `Use ${formatSize(totalGb)} active data, ${Number(state.context.concurrentUsers || 0).toLocaleString()} peak report users, ${runs.toLocaleString()} runs per day, and ${Math.max(1, overlaps)} assumed overlapping refresh window${overlaps === 1 ? "" : "s"} as starting SKU Estimator inputs. Add measured CU duration, query peaks, refresh duration, growth, and background-job overlap before choosing capacity.`;
+      }
+      if (/ready|score|position|summary/.test(q)) {
+        const counts = {ready:0,optimize:0,blocked:0};
+        assessments.forEach(a => counts[a.status]++);
+        return `${customer} has a directional readiness score of ${score()}% across ${assessments.length} workload${assessments.length === 1 ? "" : "s"}: ${counts.ready} ready, ${counts.optimize} to optimise, and ${counts.blocked} requiring redesign. This is a discovery aid, not a final migration approval.`;
+      }
+      if (/next|pilot|start|priority|recommend/.test(q)) {
+        const firstReady = assessments.find(a => a.status === "ready");
+        const firstRisk = blocked[0] || optimise[0];
+        const actions = [];
+        if (gaps.length) actions.push(`complete the missing discovery fields (${gaps.join(", ")})`);
+        if (firstReady) actions.push(`use "${firstReady.workload.name}" as a low-risk pilot candidate`);
+        if (firstRisk) actions.push(`run a focused design review for "${firstRisk.workload.name}"`);
+        actions.push("capture peak-hour telemetry and validate it in the Fabric SKU Estimator");
+        return `Recommended sequence:\n1. ${actions.join("\n2. ")}.`;
+      }
+      return `For ${customer}, I can help with readiness, blockers, target Fabric patterns, discovery gaps, capacity inputs, or recommended next steps. Ask one of the suggested questions, or add more workload detail so the guidance becomes more specific.`;
+    }
+    function renderAssistant() {
+      if (!Array.isArray(state.conversation)) state.conversation = [];
+      const welcome = {
+        role:"assistant",
+        text:"I use the discovery details and workload rules in this assessment to provide contextual guidance. What would you like to understand?"
+      };
+      const messages = state.conversation.length ? state.conversation : [welcome];
+      const chat = document.getElementById("assistantChat");
+      chat.innerHTML = messages.map(m => `<div class="message ${m.role}"><span class="message-role">${m.role === "user" ? "You" : "Readiness assistant"}</span>${esc(m.text)}</div>`).join("");
+      chat.scrollTop = chat.scrollHeight;
+      const suggestions = [
+        "What discovery information is missing?",
+        "What are the biggest blockers?",
+        "Which Fabric patterns fit this estate?",
+        "What should we enter in the SKU Estimator?",
+        "What should we do next?"
+      ];
+      document.getElementById("suggestedQuestions").innerHTML = suggestions.map(q => `<button class="btn small suggested" type="button" data-question="${esc(q)}">${esc(q)}</button>`).join("");
+      document.querySelectorAll(".suggested").forEach(button => button.onclick = () => askAssistant(button.dataset.question));
+    }
+    function askAssistant(question) {
+      const text = String(question || "").trim();
+      if (!text) return;
+      if (!Array.isArray(state.conversation)) state.conversation = [];
+      state.conversation.push({role:"user",text});
+      state.conversation.push({role:"assistant",text:answerQuestion(text)});
+      document.getElementById("assistantQuestion").value = "";
+      saveState();
+      renderAssistant();
+    }
     function statusLabel(status) { return status === "ready" ? "Ready" : status === "optimize" ? "Optimise" : "Redesign"; }
     function statusBadge(status) { return `<span class="badge ${status}"><span class="dot"></span>${statusLabel(status)}</span>`; }
     function score() {
@@ -798,7 +951,7 @@
         : "Capacity position: no obvious high-pressure signal from current inputs, but validate run duration and peak concurrency with telemetry.";
     }
     function formatSize(gb) { return gb >= 1000 ? `${(gb/1000).toFixed(1)} TB` : `${Math.round(gb).toLocaleString()} GB`; }
-    function renderAll() { setContext(); renderWorkloads(); renderAssessment(); renderSummary(); }
+    function renderAll() { setContext(); renderWorkloads(); renderAssessment(); renderSummary(); renderAssistant(); }
     function openWorkload(id) {
       const w = state.workloads.find(x => x.id === id);
       document.getElementById("dialogTitle").textContent = w ? "Edit workload" : "Add workload";
@@ -845,6 +998,10 @@
         switchView(order[order.indexOf(currentView) + 1]);
       };
       document.getElementById("printBtn").onclick = () => window.print();
+      document.getElementById("assistantForm").onsubmit = event => {
+        event.preventDefault();
+        askAssistant(document.getElementById("assistantQuestion").value);
+      };
       document.getElementById("closeDialogBtn").onclick = document.getElementById("cancelDialogBtn").onclick = () => document.getElementById("workloadDialog").close();
       document.getElementById("workloadForm").onsubmit = event => {
         event.preventDefault();

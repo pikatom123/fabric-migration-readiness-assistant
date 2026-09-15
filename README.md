@@ -6,6 +6,7 @@ workloads for migration to Microsoft Fabric.
 ## Version 1
 
 - Captures customer goals, constraints, scale, and governance context
+- Answers discovery questions using local, context-aware guided intelligence
 - Inventories workloads across Microsoft analytics and integration services
 - Maps workloads to Fabric patterns using explainable rules
 - Flags blockers, redesign needs, and optimisation opportunities
@@ -16,6 +17,10 @@ workloads for migration to Microsoft Fabric.
 
 Open `index.html` in a modern browser. The prototype is self-contained and saves
 assessment data in browser local storage.
+
+The discovery assistant runs entirely in the browser. It uses the captured
+customer context and explainable workload assessment rules; it does not send
+customer information to an external AI service.
 
 ## Disclaimer
 

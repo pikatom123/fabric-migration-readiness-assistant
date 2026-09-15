@@ -1,0 +1,875 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fabric Migration Readiness Assistant</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    a { color: var(--cp-link); }
+    .app { display: grid; grid-template-columns: 264px 1fr; min-height: 100vh; }
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 18px;
+      background: var(--cp-bg-elevated);
+      border-right: 1px solid var(--cp-border);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; padding: 0 8px; }
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+    .brand strong { display: block; font-size: 15px; }
+    .brand span { display: block; color: var(--cp-text-muted); font-size: 12px; margin-top: 2px; }
+    .nav { display: grid; gap: 6px; }
+    .nav button {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--cp-text-muted);
+      border-radius: 10px;
+      padding: 11px 12px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav button:hover { background: var(--cp-surface-soft); color: var(--cp-text); }
+    .nav button.active {
+      background: var(--cp-accent-soft);
+      border-color: var(--cp-accent);
+      color: var(--cp-accent);
+      font-weight: 650;
+    }
+    .step-number {
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--cp-border);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+    }
+    .sidebar-foot {
+      margin-top: auto;
+      border-top: 1px solid var(--cp-border);
+      padding: 16px 8px 0;
+      color: var(--cp-text-muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    main { min-width: 0; }
+    .topbar {
+      min-height: 72px;
+      padding: 16px 30px;
+      border-bottom: 1px solid var(--cp-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: var(--cp-panel-strong);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .topbar h1 { margin: 0; font-size: 18px; letter-spacing: -0.2px; }
+    .topbar p { margin: 3px 0 0; color: var(--cp-text-muted); font-size: 12px; }
+    .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      min-height: 36px;
+      border: 1px solid var(--cp-border);
+      border-radius: 10px;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      padding: 8px 13px;
+      font-weight: 600;
+    }
+    .btn:hover { border-color: var(--cp-border-strong); }
+    .btn.primary { background: var(--cp-accent); border-color: var(--cp-accent); color: var(--cp-accent-fg); }
+    .btn.primary:hover { background: var(--cp-accent-hover); }
+    .btn.danger { color: var(--cp-danger); }
+    .btn.small { min-height: 30px; padding: 5px 9px; font-size: 12px; }
+    .content { padding: 28px 30px 48px; max-width: 1500px; margin: 0 auto; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      gap: 28px;
+      margin-bottom: 22px;
+      align-items: flex-start;
+    }
+    .hero h2 { margin: 0 0 8px; font-size: 28px; letter-spacing: -0.7px; }
+    .hero p { margin: 0; color: var(--cp-text-muted); max-width: 720px; line-height: 1.55; }
+    .card {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      padding: 20px;
+    }
+    .card h3 { margin: 0 0 4px; font-size: 16px; }
+    .card-sub { color: var(--cp-text-muted); font-size: 12px; margin-bottom: 18px; }
+    .grid { display: grid; gap: 16px; }
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .field { display: grid; gap: 6px; }
+    .field label { font-size: 12px; color: var(--cp-text-muted); font-weight: 650; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--cp-border);
+      border-radius: 10px;
+      background: var(--cp-bg-elevated);
+      color: var(--cp-text);
+      padding: 10px 11px;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--cp-accent); }
+    textarea { resize: vertical; min-height: 78px; }
+    .metric {
+      padding: 18px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+    }
+    .metric-label { color: var(--cp-text-muted); font-size: 12px; }
+    .metric-value { font-size: 28px; font-weight: 750; margin: 8px 0 4px; letter-spacing: -0.6px; }
+    .metric-note { color: var(--cp-text-soft); font-size: 11px; }
+    .score-ring {
+      width: 88px;
+      height: 88px;
+      border: 9px solid var(--cp-accent-soft);
+      border-top-color: var(--cp-accent);
+      border-right-color: var(--cp-accent);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 23px;
+      font-weight: 750;
+      flex: 0 0 auto;
+    }
+    .toolbar { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .toolbar .field { min-width: 240px; }
+    .table-wrap { border: 1px solid var(--cp-border); border-radius: 16px; overflow: auto; background: var(--cp-surface); }
+    table { border-collapse: collapse; width: 100%; min-width: 850px; }
+    th, td { text-align: left; border-bottom: 1px solid var(--cp-border); padding: 13px 14px; vertical-align: middle; }
+    th { font-size: 11px; color: var(--cp-text-muted); text-transform: uppercase; letter-spacing: 0.45px; background: var(--cp-surface-soft); }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: var(--cp-accent-soft); }
+    .workload-name { font-weight: 650; }
+    .workload-meta { color: var(--cp-text-muted); font-size: 11px; margin-top: 3px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--cp-border);
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge.ready { color: var(--cp-success); border-color: var(--cp-success); }
+    .badge.optimize { color: var(--cp-warning); border-color: var(--cp-warning); }
+    .badge.blocked { color: var(--cp-danger); border-color: var(--cp-danger); }
+    .badge.neutral { color: var(--cp-text-muted); }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .assessment-list { display: grid; gap: 14px; }
+    .assessment {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .assessment-head {
+      padding: 16px 18px;
+      display: grid;
+      grid-template-columns: minmax(180px, 1.2fr) minmax(220px, 1.5fr) auto;
+      gap: 18px;
+      align-items: center;
+    }
+    .assessment-head h4 { margin: 0 0 4px; font-size: 14px; }
+    .mapping { color: var(--cp-text-muted); font-size: 12px; }
+    .assessment-body {
+      display: none;
+      padding: 0 18px 18px;
+      border-top: 1px solid var(--cp-border);
+    }
+    .assessment.open .assessment-body { display: block; }
+    .detail-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; padding-top: 16px; }
+    .detail-grid h5 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; color: var(--cp-text-muted); letter-spacing: 0.4px; }
+    .detail-grid ul { padding-left: 17px; margin: 0; line-height: 1.55; }
+    .detail-grid li + li { margin-top: 6px; }
+    .empty { color: var(--cp-text-muted); font-style: italic; }
+    .summary-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.8fr); gap: 18px; }
+    .summary-block + .summary-block { border-top: 1px solid var(--cp-border); margin-top: 18px; padding-top: 18px; }
+    .summary-block h3 { margin: 0 0 10px; }
+    .summary-block p { margin: 0; color: var(--cp-text-muted); line-height: 1.6; }
+    .status-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+    .bar { height: 9px; background: var(--cp-surface-soft); border-radius: 999px; overflow: hidden; flex: 1; border: 1px solid var(--cp-border); }
+    .bar > span { display: block; height: 100%; background: var(--cp-accent); }
+    .status-row strong { width: 30px; text-align: right; }
+    .recommendations { margin: 0; padding-left: 20px; line-height: 1.55; }
+    .recommendations li + li { margin-top: 8px; }
+    .callout {
+      border-left: 4px solid var(--cp-accent);
+      background: var(--cp-accent-soft);
+      padding: 14px 16px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+    .estimator {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .estimator div { padding: 12px; border: 1px solid var(--cp-border); border-radius: 10px; }
+    .estimator span { display: block; color: var(--cp-text-muted); font-size: 11px; margin-bottom: 5px; }
+    .estimator strong { font-size: 16px; }
+    dialog {
+      width: min(720px, calc(100vw - 32px));
+      max-height: calc(100vh - 32px);
+      overflow: auto;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      padding: 0;
+      box-shadow: var(--cp-shadow);
+    }
+    dialog::backdrop { background: var(--cp-overlay); }
+    .dialog-head, .dialog-foot { padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .dialog-head { border-bottom: 1px solid var(--cp-border); }
+    .dialog-head h3 { margin: 0; }
+    .dialog-body { padding: 20px; }
+    .dialog-foot { border-top: 1px solid var(--cp-border); justify-content: flex-end; }
+    .feature-box {
+      margin-top: 18px;
+      border: 1px solid var(--cp-border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .feature-box legend { color: var(--cp-text-muted); font-size: 12px; font-weight: 650; padding: 0 5px; }
+    .checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .check { display: flex; align-items: flex-start; gap: 8px; color: var(--cp-text-muted); font-size: 12px; }
+    .check input { width: auto; margin-top: 2px; }
+    .section-gap { margin-top: 16px; }
+    .muted { color: var(--cp-text-muted); }
+    .right { text-align: right; }
+    .hide { display: none !important; }
+    @media (max-width: 1000px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--cp-border); padding: 14px 18px; }
+      .brand { display: none; }
+      .nav { grid-template-columns: repeat(4, 1fr); }
+      .nav button { justify-content: center; }
+      .sidebar-foot { display: none; }
+      .topbar { top: 0; }
+      .summary-layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .content { padding: 22px 16px 40px; }
+      .topbar { padding: 12px 16px; align-items: flex-start; }
+      .topbar .actions .btn:not(.primary) { display: none; }
+      .hero { flex-direction: column; }
+      .hero h2 { font-size: 24px; }
+      .grid.two, .grid.three, .grid.four, .detail-grid { grid-template-columns: 1fr; }
+      .nav button { padding: 8px 4px; font-size: 11px; flex-direction: column; gap: 4px; }
+      .toolbar { align-items: stretch; flex-direction: column; }
+      .toolbar .field { min-width: 0; }
+      .assessment-head { grid-template-columns: 1fr; gap: 8px; }
+      .checks { grid-template-columns: 1fr; }
+      .estimator { grid-template-columns: 1fr; }
+    }
+    @media print {
+      .sidebar, .topbar, .no-print, dialog { display: none !important; }
+      .app { display: block; }
+      .content { max-width: none; padding: 0; }
+      .view { display: none !important; }
+      #summary.view { display: block !important; }
+      body { background: var(--cp-surface); }
+      .summary-layout { grid-template-columns: 2fr 1fr; }
+      .card, .metric { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">F</div>
+        <div><strong>Fabric Readiness</strong><span>Migration &amp; optimisation</span></div>
+      </div>
+      <nav class="nav" aria-label="Assessment steps">
+        <button class="active" data-view="discovery"><span class="step-number">1</span>Discovery</button>
+        <button data-view="workloads"><span class="step-number">2</span>Workloads</button>
+        <button data-view="assessment"><span class="step-number">3</span>Assessment</button>
+        <button data-view="summary"><span class="step-number">4</span>Summary</button>
+      </nav>
+      <div class="sidebar-foot">A CSA-guided prototype. Recommendations are directional and should be validated against current Fabric documentation and the SKU Estimator.</div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <h1 id="topTitle">Discovery</h1>
+          <p id="topSubtitle">Capture the customer context and migration constraints.</p>
+        </div>
+        <div class="actions">
+          <button class="btn" id="sampleBtn">Load sample</button>
+          <button class="btn" id="resetBtn">Reset</button>
+          <button class="btn primary" id="nextBtn">Continue</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <section class="view active" id="discovery">
+          <div class="hero">
+            <div>
+              <h2>Understand the migration ambition</h2>
+              <p>Capture the customer, target outcomes, operating constraints, and scale assumptions that influence the recommended Fabric architecture.</p>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Customer context</h3>
+            <div class="card-sub">Saved locally in this browser while you work.</div>
+            <div class="grid two">
+              <div class="field"><label for="customerName">Customer name</label><input id="customerName" placeholder="Contoso Retail"></div>
+              <div class="field"><label for="industry">Industry</label><input id="industry" placeholder="Retail"></div>
+              <div class="field"><label for="region">Primary Azure region</label>
+                <select id="region"><option>UK South</option><option>North Europe</option><option>West Europe</option><option>East US</option><option>West US 2</option><option>Southeast Asia</option><option>Australia East</option><option>Other / undecided</option></select>
+              </div>
+              <div class="field"><label for="targetDate">Target migration date</label><input id="targetDate" type="date"></div>
+              <div class="field"><label for="users">Power BI users</label><input id="users" type="number" min="0" value="250"></div>
+              <div class="field"><label for="concurrentUsers">Peak concurrent users</label><input id="concurrentUsers" type="number" min="0" value="40"></div>
+              <div class="field"><label for="governance">Governance maturity</label>
+                <select id="governance"><option value="1">Ad hoc</option><option value="2" selected>Developing</option><option value="3">Established</option><option value="4">Managed</option></select>
+              </div>
+              <div class="field"><label for="strategy">Preferred migration strategy</label>
+                <select id="strategy"><option>Balanced</option><option>Fast replatform</option><option>Optimise before migration</option><option>Coexistence / phased</option></select>
+              </div>
+            </div>
+            <div class="field section-gap"><label for="outcomes">Business outcomes</label><textarea id="outcomes" placeholder="Reduce platform complexity, improve freshness, consolidate analytics..."></textarea></div>
+            <div class="field section-gap"><label for="constraints">Known constraints</label><textarea id="constraints" placeholder="Data residency, private networking, fixed reporting windows, specialist skills..."></textarea></div>
+          </div>
+        </section>
+
+        <section class="view" id="workloads">
+          <div class="hero">
+            <div>
+              <h2>Inventory the analytics estate</h2>
+              <p>Add representative workloads and the features that materially affect migration. The assistant evaluates each workload independently and then checks estate-wide pressure.</p>
+            </div>
+            <button class="btn primary" id="addWorkloadBtn">Add workload</button>
+          </div>
+          <div class="toolbar">
+            <div class="field"><label for="filterType">Filter by technology</label><select id="filterType"><option value="">All technologies</option></select></div>
+            <div class="muted" id="workloadCount"></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Workload</th><th>Technology</th><th>Scale</th><th>Pattern</th><th>Readiness</th><th class="right">Actions</th></tr></thead>
+              <tbody id="workloadRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="view" id="assessment">
+          <div class="hero">
+            <div>
+              <h2>Review mappings and migration findings</h2>
+              <p>Mappings combine workload type, scale, dependencies, feature flags, and customer context. Expand a workload to see blockers, optimisations, and follow-up questions.</p>
+            </div>
+            <div class="score-ring" id="scoreRing">0%</div>
+          </div>
+          <div class="grid four" id="assessmentMetrics"></div>
+          <div class="assessment-list section-gap" id="assessmentList"></div>
+        </section>
+
+        <section class="view" id="summary">
+          <div class="hero">
+            <div>
+              <h2>Customer-ready readiness summary</h2>
+              <p id="summaryLead">Add workloads to generate a migration position and recommended next steps.</p>
+            </div>
+            <button class="btn primary no-print" id="printBtn">Print / save PDF</button>
+          </div>
+          <div class="summary-layout">
+            <div class="card">
+              <div class="summary-block">
+                <h3>Executive position</h3>
+                <p id="executivePosition"></p>
+              </div>
+              <div class="summary-block">
+                <h3>Recommended target patterns</h3>
+                <div id="targetPatterns"></div>
+              </div>
+              <div class="summary-block">
+                <h3>Priority next steps</h3>
+                <ol class="recommendations" id="nextSteps"></ol>
+              </div>
+              <div class="summary-block">
+                <h3>Key discovery questions</h3>
+                <ol class="recommendations" id="summaryQuestions"></ol>
+              </div>
+            </div>
+            <div class="grid">
+              <div class="card">
+                <h3>Readiness profile</h3>
+                <div class="card-sub">Workloads by disposition</div>
+                <div id="statusProfile"></div>
+              </div>
+              <div class="card">
+                <h3>SKU Estimator inputs</h3>
+                <div class="card-sub">Directional inputs to validate, not a capacity quote.</div>
+                <div class="estimator" id="estimatorInputs"></div>
+              </div>
+              <div class="callout" id="capacityCallout"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="workloadDialog">
+    <form method="dialog" id="workloadForm">
+      <div class="dialog-head"><h3 id="dialogTitle">Add workload</h3><button class="btn small" value="cancel" type="button" id="closeDialogBtn">Close</button></div>
+      <div class="dialog-body">
+        <input type="hidden" id="workloadId">
+        <div class="grid two">
+          <div class="field"><label for="workloadName">Workload name</label><input id="workloadName" required placeholder="Executive sales model"></div>
+          <div class="field"><label for="workloadType">Current technology</label><select id="workloadType"></select></div>
+          <div class="field"><label for="workloadSize">Data size (GB)</label><input id="workloadSize" type="number" min="0" value="100"></div>
+          <div class="field"><label for="workloadRefresh">Runs / refreshes per day</label><input id="workloadRefresh" type="number" min="0" value="4"></div>
+          <div class="field"><label for="workloadConcurrency">Peak concurrency</label><input id="workloadConcurrency" type="number" min="0" value="10"></div>
+          <div class="field"><label for="workloadComplexity">Complexity</label><select id="workloadComplexity"><option>Low</option><option selected>Medium</option><option>High</option></select></div>
+        </div>
+        <fieldset class="feature-box">
+          <legend>Features and dependencies</legend>
+          <div class="checks" id="featureChecks"></div>
+        </fieldset>
+        <div class="field section-gap"><label for="workloadNotes">Notes</label><textarea id="workloadNotes" placeholder="SLA, ownership, critical dependencies, known pain points..."></textarea></div>
+      </div>
+      <div class="dialog-foot"><button class="btn" type="button" id="cancelDialogBtn">Cancel</button><button class="btn primary" type="submit">Save workload</button></div>
+    </form>
+  </dialog>
+
+  <script>
+    const TYPES = [
+      "Power BI", "SSAS / Azure Analysis Services", "Azure SQL", "Synapse",
+      "Databricks", "Azure Data Factory", "Logic Apps", "Spark jobs", "Automation runbooks"
+    ];
+    const FEATURES = [
+      ["calculated-columns", "Calculated columns / tables"],
+      ["composite-model", "Composite model or DirectQuery"],
+      ["unsupported-model", "Unsupported model or MDX feature"],
+      ["self-hosted-ir", "Self-hosted integration runtime"],
+      ["custom-connector", "Custom or uncommon connector"],
+      ["ssis", "SSIS package dependency"],
+      ["private-network", "Private endpoint / network dependency"],
+      ["custom-libraries", "Custom libraries, JARs, or init scripts"],
+      ["streaming", "Streaming or sub-minute SLA"],
+      ["stateful", "Stateful orchestration / callbacks"],
+      ["cdc", "CDC, triggers, or unsupported data types"],
+      ["high-overlap", "Refresh or job overlap at peak"],
+      ["manual-ops", "Manual deployment or fragile ownership"]
+    ];
+    const STORAGE_KEY = "fabric-readiness-prototype-v1";
+    const sampleState = {
+      context: {
+        customerName: "Contoso Retail", industry: "Retail", region: "UK South",
+        targetDate: "2027-03-31", users: 1800, concurrentUsers: 220, governance: "2",
+        strategy: "Coexistence / phased",
+        outcomes: "Consolidate the analytics estate, improve freshness, and reduce duplicate data movement.",
+        constraints: "Private connectivity is mandatory. Month-end reporting has a fixed two-hour processing window."
+      },
+      workloads: [
+        {id:"w1",name:"Executive sales semantic model",type:"Power BI",size:85,refresh:8,concurrency:180,complexity:"High",features:["calculated-columns","composite-model","high-overlap"],notes:"Business-critical model with shared datasets."},
+        {id:"w2",name:"Finance planning cube",type:"SSAS / Azure Analysis Services",size:420,refresh:1,concurrency:45,complexity:"High",features:["unsupported-model","calculated-columns"],notes:"Uses MDX scripts and writeback workflow."},
+        {id:"w3",name:"Retail data integration",type:"Azure Data Factory",size:2600,refresh:24,concurrency:12,complexity:"High",features:["self-hosted-ir","custom-connector","private-network"],notes:"Connects stores, SAP, and on-premises SQL Server."},
+        {id:"w4",name:"Customer feature engineering",type:"Databricks",size:7400,refresh:6,concurrency:25,complexity:"High",features:["custom-libraries","private-network"],notes:"ML feature pipelines with custom Python wheels."},
+        {id:"w5",name:"Telemetry stream",type:"Spark jobs",size:1900,refresh:1440,concurrency:20,complexity:"Medium",features:["streaming"],notes:"Near-real-time operational dashboard."},
+        {id:"w6",name:"Order warehouse",type:"Azure SQL",size:1200,refresh:24,concurrency:80,complexity:"Medium",features:["cdc","private-network"],notes:"Operational replica used for analytics."},
+        {id:"w7",name:"Exception notifications",type:"Logic Apps",size:5,refresh:350,concurrency:10,complexity:"Medium",features:["stateful"],notes:"Long-running approval and notification flow."}
+      ]
+    };
+    let state = loadState();
+    let currentView = "discovery";
+
+    function emptyState() {
+      return {context:{customerName:"",industry:"",region:"UK South",targetDate:"",users:250,concurrentUsers:40,governance:"2",strategy:"Balanced",outcomes:"",constraints:""},workloads:[]};
+    }
+    function loadState() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || emptyState(); }
+      catch { return emptyState(); }
+    }
+    function saveState() {
+      readContext();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+    function esc(value) {
+      return String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+    }
+    function setContext() {
+      Object.entries(state.context).forEach(([key,value]) => {
+        const el = document.getElementById(key);
+        if (el) el.value = value;
+      });
+    }
+    function readContext() {
+      ["customerName","industry","region","targetDate","users","concurrentUsers","governance","strategy","outcomes","constraints"].forEach(key => {
+        const el = document.getElementById(key);
+        if (el) state.context[key] = el.type === "number" ? Number(el.value || 0) : el.value;
+      });
+    }
+    function assess(w) {
+      let status = "ready";
+      let pattern = "";
+      const risks = [];
+      const optimisations = [];
+      const questions = [];
+      const has = f => w.features.includes(f);
+      const optimise = message => { if (status === "ready") status = "optimize"; optimisations.push(message); };
+      const block = message => { status = "blocked"; risks.push(message); };
+
+      switch (w.type) {
+        case "Power BI":
+          pattern = "Power BI semantic model + Direct Lake";
+          if (has("calculated-columns")) optimise("Move stable calculated columns upstream into the Lakehouse or Warehouse to reduce model processing pressure.");
+          if (has("composite-model")) optimise("Validate Direct Lake fallback behavior, source groups, relationships, and query performance.");
+          if (has("unsupported-model")) block("The model contains features that require redesign or confirmation against current Direct Lake support.");
+          questions.push("Which DAX, security, composite-model, and XMLA features are essential?");
+          break;
+        case "SSAS / Azure Analysis Services":
+          pattern = "Power BI semantic model over Warehouse or Lakehouse";
+          optimise("Use a model compatibility review and migrate transformations out of the semantic layer where practical.");
+          if (has("calculated-columns")) optimise("Materialise high-cost calculated columns upstream.");
+          if (has("unsupported-model")) block("MDX, writeback, multidimensional, or other unsupported behavior needs a replacement design.");
+          questions.push("Is the model Tabular or Multidimensional, and does it use perspectives, translations, calculation groups, writeback, or MDX scripts?");
+          break;
+        case "Azure SQL":
+          pattern = "Fabric Warehouse with mirroring or Data Factory ingestion";
+          if (has("cdc")) optimise("Confirm mirroring or CDC compatibility, source impact, and handling for unsupported data types.");
+          questions.push("Is this an operational source, an analytical store, or both, and what is the acceptable replication latency?");
+          break;
+        case "Synapse":
+          pattern = "Fabric Warehouse + Lakehouse + Data Factory";
+          optimise("Separate SQL, Spark, and orchestration concerns and test workload-specific compatibility.");
+          if (has("unsupported-model")) block("Dedicated SQL or workspace features require redesign before migration.");
+          questions.push("Which serverless SQL, dedicated pool, Spark, pipeline, and security features are in use?");
+          break;
+        case "Databricks":
+          pattern = "OneLake shortcut with Fabric Spark, or governed coexistence";
+          optimise("Use coexistence first where notebooks, ML tooling, or platform-specific governance have strong dependencies.");
+          if (has("custom-libraries")) optimise("Inventory runtimes, custom libraries, init scripts, cluster policies, and ML lifecycle dependencies.");
+          questions.push("Is the goal full replatforming, data sharing through OneLake, or workload-by-workload coexistence?");
+          break;
+        case "Azure Data Factory":
+          pattern = "Fabric Data Factory pipelines and Dataflows Gen2";
+          if (has("self-hosted-ir")) block("Self-hosted integration runtime connectivity requires a supported gateway or retained external integration pattern.");
+          if (has("custom-connector")) block("Connector parity must be confirmed; a custom connector may require retention or redesign.");
+          if (has("ssis")) block("SSIS execution is not an as-is Fabric pipeline migration.");
+          questions.push("Which activities, connectors, integration runtimes, triggers, parameters, and managed private endpoints are used?");
+          break;
+        case "Logic Apps":
+          pattern = "Retain Logic Apps for application workflow; invoke Fabric for data work";
+          optimise("Keep event and application orchestration outside Fabric unless the flow is a data pipeline.");
+          if (has("stateful")) block("Long-running state, callbacks, approvals, or application integration should not be reimplemented as a Fabric data pipeline.");
+          questions.push("Does the workflow orchestrate data movement or implement application integration and human approval?");
+          break;
+        case "Spark jobs":
+          pattern = has("streaming") ? "Real-Time Intelligence + Eventstream + Fabric Spark" : "Fabric Lakehouse + Spark";
+          if (has("custom-libraries")) optimise("Test runtime, library, JAR, and notebook compatibility.");
+          if (has("streaming")) optimise("Validate event rate, latency SLA, windowing, retention, and downstream query concurrency.");
+          questions.push("What are the runtime version, library, scheduling, streaming, and checkpoint dependencies?");
+          break;
+        case "Automation runbooks":
+          pattern = "Retain Azure Automation or move to Functions; call Fabric APIs";
+          optimise("Keep platform administration and control-plane automation separate from analytics orchestration.");
+          if (has("stateful")) block("Long-running control workflows need an external orchestration design.");
+          questions.push("Which credentials, modules, schedules, webhooks, and control-plane operations are required?");
+          break;
+      }
+      if (has("private-network")) optimise("Validate tenant, workspace, gateway, private endpoint, and source network topology.");
+      if (has("high-overlap")) optimise("Sequence or stagger refreshes and jobs to reduce peak capacity contention.");
+      if (has("manual-ops")) optimise("Introduce source control, deployment pipelines, ownership, monitoring, and runbooks.");
+      if (w.complexity === "High" && status === "ready") status = "optimize";
+      if (w.size > 5000) optimise("Benchmark partitioning, file sizes, ingestion throughput, and query pruning at representative scale.");
+      return {status, pattern, risks, optimisations:[...new Set(optimisations)], questions};
+    }
+    function allAssessments() { return state.workloads.map(w => ({workload:w, ...assess(w)})); }
+    function statusLabel(status) { return status === "ready" ? "Ready" : status === "optimize" ? "Optimise" : "Redesign"; }
+    function statusBadge(status) { return `<span class="badge ${status}"><span class="dot"></span>${statusLabel(status)}</span>`; }
+    function score() {
+      if (!state.workloads.length) return 0;
+      const points = {ready:100,optimize:65,blocked:25};
+      let result = allAssessments().reduce((sum,a) => sum + points[a.status], 0) / state.workloads.length;
+      const overlap = state.workloads.filter(w => w.features.includes("high-overlap")).length;
+      if (overlap > 1) result -= 5;
+      if (Number(state.context.governance) === 1) result -= 6;
+      return Math.max(0, Math.round(result));
+    }
+    function renderWorkloads() {
+      const filter = document.getElementById("filterType").value;
+      const rows = state.workloads.filter(w => !filter || w.type === filter);
+      document.getElementById("workloadCount").textContent = `${rows.length} of ${state.workloads.length} workloads`;
+      document.getElementById("workloadRows").innerHTML = rows.length ? rows.map(w => {
+        const a = assess(w);
+        return `<tr>
+          <td><div class="workload-name">${esc(w.name)}</div><div class="workload-meta">${esc(w.complexity)} complexity</div></td>
+          <td>${esc(w.type)}</td><td>${Number(w.size).toLocaleString()} GB<br><span class="workload-meta">${Number(w.refresh).toLocaleString()} runs/day</span></td>
+          <td>${esc(a.pattern)}</td><td>${statusBadge(a.status)}</td>
+          <td class="right"><button class="btn small edit" data-id="${esc(w.id)}">Edit</button> <button class="btn small danger delete" data-id="${esc(w.id)}">Delete</button></td>
+        </tr>`;
+      }).join("") : `<tr><td colspan="6" class="muted">No workloads yet. Add one or load the sample estate.</td></tr>`;
+      document.querySelectorAll(".edit").forEach(b => b.onclick = () => openWorkload(b.dataset.id));
+      document.querySelectorAll(".delete").forEach(b => b.onclick = () => {
+        state.workloads = state.workloads.filter(w => w.id !== b.dataset.id);
+        saveState(); renderAll();
+      });
+    }
+    function renderAssessment() {
+      const assessments = allAssessments();
+      const counts = {ready:0,optimize:0,blocked:0};
+      assessments.forEach(a => counts[a.status]++);
+      document.getElementById("scoreRing").textContent = `${score()}%`;
+      document.getElementById("assessmentMetrics").innerHTML = [
+        ["Workloads",state.workloads.length,"In assessment scope"],
+        ["Ready",counts.ready,"Can move with validation"],
+        ["Optimise",counts.optimize,"Tune before or during migration"],
+        ["Redesign",counts.blocked,"Blocking dependency identified"]
+      ].map(x => `<div class="metric"><div class="metric-label">${x[0]}</div><div class="metric-value">${x[1]}</div><div class="metric-note">${x[2]}</div></div>`).join("");
+      document.getElementById("assessmentList").innerHTML = assessments.length ? assessments.map((a,i) => `
+        <article class="assessment">
+          <div class="assessment-head">
+            <div><h4>${esc(a.workload.name)}</h4><div class="mapping">${esc(a.workload.type)} · ${Number(a.workload.size).toLocaleString()} GB</div></div>
+            <div><strong>${esc(a.pattern)}</strong><div class="mapping">Recommended target pattern</div></div>
+            <button class="btn small expand" data-index="${i}">${statusBadge(a.status)} &nbsp; Details</button>
+          </div>
+          <div class="assessment-body"><div class="detail-grid">
+            <div><h5>Risks / blockers</h5>${list(a.risks,"No blocking issue identified.")}</div>
+            <div><h5>Optimisation opportunities</h5>${list(a.optimisations,"Migrate with standard validation.")}</div>
+            <div><h5>Follow-up questions</h5>${list(a.questions,"Confirm ownership, SLA, and acceptance criteria.")}</div>
+          </div></div>
+        </article>`).join("") : `<div class="card muted">Add workloads to generate the assessment.</div>`;
+      document.querySelectorAll(".expand").forEach(b => b.onclick = () => b.closest(".assessment").classList.toggle("open"));
+    }
+    function list(items, emptyText) {
+      return items.length ? `<ul>${items.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : `<div class="empty">${esc(emptyText)}</div>`;
+    }
+    function renderSummary() {
+      const assessments = allAssessments();
+      const counts = {ready:0,optimize:0,blocked:0};
+      assessments.forEach(a => counts[a.status]++);
+      const total = assessments.length;
+      const customer = state.context.customerName || "The customer";
+      const readiness = score();
+      const disposition = readiness >= 80 ? "strong candidate for a phased Fabric migration" : readiness >= 55 ? "viable candidate with targeted optimisation and design work" : "candidate requiring blocker resolution and architecture validation before commitment";
+      document.getElementById("summaryLead").textContent = `${customer}: ${readiness}% directional readiness across ${total} workload${total === 1 ? "" : "s"}.`;
+      document.getElementById("executivePosition").textContent = total
+        ? `${customer} is a ${disposition}. ${counts.ready} workload${counts.ready === 1 ? " is" : "s are"} ready for migration validation, ${counts.optimize} should be optimised, and ${counts.blocked} require redesign or dependency resolution. A phased approach should prove connectivity, semantic model compatibility, and peak-capacity behavior before scaling.`
+        : "No workloads have been assessed.";
+
+      const patterns = {};
+      assessments.forEach(a => patterns[a.pattern] = (patterns[a.pattern] || 0) + 1);
+      document.getElementById("targetPatterns").innerHTML = Object.keys(patterns).length
+        ? Object.entries(patterns).sort((a,b) => b[1]-a[1]).map(([p,n]) => `<div class="status-row"><span class="badge neutral">${n}</span><span>${esc(p)}</span></div>`).join("")
+        : `<span class="muted">No target patterns generated.</span>`;
+
+      const steps = [];
+      if (counts.blocked) steps.push("Run focused design workshops for the redesign workloads and agree which dependencies stay on Azure services.");
+      if (assessments.some(a => a.workload.type.includes("SSAS") || a.workload.type === "Power BI")) steps.push("Complete a semantic-model compatibility scan and benchmark representative DAX queries in Direct Lake.");
+      if (assessments.some(a => a.workload.features.includes("self-hosted-ir") || a.workload.features.includes("private-network"))) steps.push("Prove end-to-end private connectivity, gateway placement, identity, and connector support.");
+      if (assessments.some(a => a.workload.features.includes("high-overlap")) || Number(state.context.concurrentUsers) > 100) steps.push("Build a peak-hour workload profile and stagger refresh, pipeline, Spark, and interactive demand.");
+      steps.push("Select one low-risk and one representative high-value workload for a time-boxed migration pilot.");
+      steps.push("Enter measured volumes, run durations, concurrency, and growth assumptions into the Fabric SKU Estimator.");
+      document.getElementById("nextSteps").innerHTML = [...new Set(steps)].slice(0,6).map(s => `<li>${esc(s)}</li>`).join("");
+
+      const questions = [...new Set(assessments.flatMap(a => a.questions))].slice(0,6);
+      document.getElementById("summaryQuestions").innerHTML = questions.length ? questions.map(q => `<li>${esc(q)}</li>`).join("") : `<li>Confirm workload owners, SLAs, critical reporting windows, and acceptance criteria.</li>`;
+
+      document.getElementById("statusProfile").innerHTML = ["ready","optimize","blocked"].map(status => {
+        const pct = total ? Math.round(counts[status] / total * 100) : 0;
+        return `<div class="status-row">${statusBadge(status)}<div class="bar"><span style="width:${pct}%"></span></div><strong>${counts[status]}</strong></div>`;
+      }).join("");
+
+      const totalGb = state.workloads.reduce((s,w) => s + Number(w.size || 0), 0);
+      const movementGb = state.workloads.reduce((s,w) => s + Number(w.size || 0) * Math.min(Number(w.refresh || 0), 24) * 0.08, 0);
+      const runs = state.workloads.reduce((s,w) => s + Number(w.refresh || 0), 0);
+      const overlap = state.workloads.filter(w => w.features.includes("high-overlap")).length;
+      const streaming = state.workloads.filter(w => w.features.includes("streaming")).length;
+      const estimator = [
+        ["Stored / active data",formatSize(totalGb)],
+        ["Daily data movement",formatSize(movementGb)],
+        ["Peak report users",Number(state.context.concurrentUsers || 0).toLocaleString()],
+        ["Pipeline / job runs",runs.toLocaleString() + " / day"],
+        ["Peak refresh overlap",Math.max(1,overlap) + " assumed"],
+        ["Real-time workloads",String(streaming)],
+        ["Growth headroom","30% suggested"],
+        ["Region",state.context.region || "Confirm"]
+      ];
+      document.getElementById("estimatorInputs").innerHTML = estimator.map(([k,v]) => `<div><span>${esc(k)}</span><strong>${esc(v)}</strong></div>`).join("");
+      const pressure = totalGb > 10000 || Number(state.context.concurrentUsers) > 200 || overlap > 1 || streaming > 0;
+      document.getElementById("capacityCallout").textContent = pressure
+        ? "Capacity watch: the estate has scale, concurrency, overlap, or real-time characteristics that warrant a measured pilot and peak-load benchmark."
+        : "Capacity position: no obvious high-pressure signal from current inputs, but validate run duration and peak concurrency with telemetry.";
+    }
+    function formatSize(gb) { return gb >= 1000 ? `${(gb/1000).toFixed(1)} TB` : `${Math.round(gb).toLocaleString()} GB`; }
+    function renderAll() { setContext(); renderWorkloads(); renderAssessment(); renderSummary(); }
+    function openWorkload(id) {
+      const w = state.workloads.find(x => x.id === id);
+      document.getElementById("dialogTitle").textContent = w ? "Edit workload" : "Add workload";
+      document.getElementById("workloadId").value = w?.id || "";
+      document.getElementById("workloadName").value = w?.name || "";
+      document.getElementById("workloadType").value = w?.type || TYPES[0];
+      document.getElementById("workloadSize").value = w?.size ?? 100;
+      document.getElementById("workloadRefresh").value = w?.refresh ?? 4;
+      document.getElementById("workloadConcurrency").value = w?.concurrency ?? 10;
+      document.getElementById("workloadComplexity").value = w?.complexity || "Medium";
+      document.getElementById("workloadNotes").value = w?.notes || "";
+      document.querySelectorAll("#featureChecks input").forEach(cb => cb.checked = w?.features.includes(cb.value) || false);
+      document.getElementById("workloadDialog").showModal();
+    }
+    function switchView(view) {
+      saveState();
+      currentView = view;
+      document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === view));
+      document.querySelectorAll(".nav button").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+      const copy = {
+        discovery:["Discovery","Capture the customer context and migration constraints."],
+        workloads:["Workloads","Inventory technologies, scale, and dependencies."],
+        assessment:["Assessment","Review mappings, blockers, and optimisation opportunities."],
+        summary:["Readiness summary","Present the migration position and recommended next steps."]
+      };
+      document.getElementById("topTitle").textContent = copy[view][0];
+      document.getElementById("topSubtitle").textContent = copy[view][1];
+      document.getElementById("nextBtn").textContent = view === "summary" ? "Print summary" : "Continue";
+      renderAll();
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+    function init() {
+      document.getElementById("workloadType").innerHTML = TYPES.map(t => `<option>${esc(t)}</option>`).join("");
+      document.getElementById("filterType").innerHTML += TYPES.map(t => `<option>${esc(t)}</option>`).join("");
+      document.getElementById("featureChecks").innerHTML = FEATURES.map(([id,label]) => `<label class="check"><input type="checkbox" value="${id}"><span>${esc(label)}</span></label>`).join("");
+      document.querySelectorAll(".nav button").forEach(b => b.onclick = () => switchView(b.dataset.view));
+      document.getElementById("addWorkloadBtn").onclick = () => openWorkload();
+      document.getElementById("filterType").onchange = renderWorkloads;
+      document.getElementById("sampleBtn").onclick = () => { state = JSON.parse(JSON.stringify(sampleState)); saveState(); renderAll(); };
+      document.getElementById("resetBtn").onclick = () => { if (confirm("Reset the assessment and remove all workloads?")) { state = emptyState(); localStorage.removeItem(STORAGE_KEY); renderAll(); switchView("discovery"); } };
+      document.getElementById("nextBtn").onclick = () => {
+        if (currentView === "summary") return window.print();
+        const order = ["discovery","workloads","assessment","summary"];
+        switchView(order[order.indexOf(currentView) + 1]);
+      };
+      document.getElementById("printBtn").onclick = () => window.print();
+      document.getElementById("closeDialogBtn").onclick = document.getElementById("cancelDialogBtn").onclick = () => document.getElementById("workloadDialog").close();
+      document.getElementById("workloadForm").onsubmit = event => {
+        event.preventDefault();
+        const id = document.getElementById("workloadId").value || `w${Date.now()}`;
+        const workload = {
+          id,
+          name: document.getElementById("workloadName").value.trim(),
+          type: document.getElementById("workloadType").value,
+          size: Number(document.getElementById("workloadSize").value || 0),
+          refresh: Number(document.getElementById("workloadRefresh").value || 0),
+          concurrency: Number(document.getElementById("workloadConcurrency").value || 0),
+          complexity: document.getElementById("workloadComplexity").value,
+          features: [...document.querySelectorAll("#featureChecks input:checked")].map(x => x.value),
+          notes: document.getElementById("workloadNotes").value.trim()
+        };
+        if (!workload.name) return;
+        const index = state.workloads.findIndex(w => w.id === id);
+        if (index >= 0) state.workloads[index] = workload; else state.workloads.push(workload);
+        document.getElementById("workloadDialog").close();
+        saveState(); renderAll();
+      };
+      document.querySelectorAll("#discovery input, #discovery select, #discovery textarea").forEach(el => el.addEventListener("change", () => { saveState(); renderSummary(); }));
+      renderAll();
+    }
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+power_bi:
+  label: Power BI semantic model
+  target_pattern: Power BI semantic model using Import or Direct Lake after compatibility validation
+  base_disposition: As-Is
+  docs_query: Microsoft Fabric Direct Lake semantic model limitations migration
+  questions:
+    - {id: storage_mode, prompt: "Which storage mode is used: Import, DirectQuery, Composite, or Direct Lake?", answer_type: choice, options: [import, directquery, composite, direct_lake]}
+    - {id: calculated_objects, prompt: "Does the model use calculated columns or calculated tables?", answer_type: boolean}
+    - {id: gateway_required, prompt: "Does it depend on an on-premises data gateway?", answer_type: boolean}
+    - {id: peak_concurrent_users, prompt: "What is the measured peak concurrent user count?", answer_type: number}
+  rules:
+    - when: {calculated_objects: true}
+      disposition: Needs Optimisation
+      actions: [Move reusable calculated-column logic upstream before choosing Direct Lake.]
+      rationale: [Model-side features must be checked against the selected storage mode.]
+    - when: {gateway_required: true}
+      disposition: Needs Optimisation
+      actions: [Validate gateway topology, identity, latency, and source connectivity.]
+
+ssas_aas:
+  label: SSAS or Azure Analysis Services
+  target_pattern: Power BI semantic model over a Fabric Warehouse or Lakehouse
+  base_disposition: Needs Optimisation
+  docs_query: migrate Azure Analysis Services SSAS to Power BI Fabric semantic model
+  questions:
+    - {id: model_type, prompt: "Is the model Tabular or Multidimensional?", answer_type: choice, options: [tabular, multidimensional]}
+    - {id: uses_writeback, prompt: "Does it require writeback?", answer_type: boolean}
+    - {id: client_compatibility, prompt: "Have all XMLA and client-tool dependencies been inventoried?", answer_type: boolean}
+  rules:
+    - when: {model_type: multidimensional}
+      disposition: Blocked / Redesign Required
+      blockers: [Multidimensional behavior requires a replacement design rather than an as-is migration.]
+      actions: [Run a Tabular redesign spike and validate required MDX behavior.]
+    - when: {uses_writeback: true}
+      disposition: Blocked / Redesign Required
+      blockers: [The required writeback workflow needs an explicitly validated replacement pattern.]
+
+azure_sql:
+  label: Azure SQL
+  target_pattern: Retain for OLTP and expose analytics through mirroring, or migrate analytical data to Fabric Warehouse
+  base_disposition: As-Is
+  docs_query: Microsoft Fabric mirrored Azure SQL database limitations Warehouse migration
+  questions:
+    - {id: workload_pattern, prompt: "Is the database primarily OLTP, analytical, or mixed?", answer_type: choice, options: [oltp, analytical, mixed]}
+    - {id: latency_critical, prompt: "Is sub-second transactional write latency required?", answer_type: boolean}
+    - {id: unsupported_features, prompt: "Are triggers, CLR, Service Broker, or cross-database dependencies present?", answer_type: boolean}
+  rules:
+    - when: {latency_critical: true}
+      disposition: Keep Outside Fabric
+      actions: [Keep the transactional system of record in Azure SQL and assess mirroring for analytics.]
+    - when: {unsupported_features: true}
+      disposition: Blocked / Redesign Required
+      blockers: [Database feature compatibility has not been established for the proposed Fabric target.]
+      actions: [Inventory each dependency and validate it against current Microsoft Learn documentation.]
+
+synapse:
+  label: Azure Synapse Analytics
+  target_pattern: Fabric Warehouse, Lakehouse, Spark, and Data Factory selected per workload component
+  base_disposition: Needs Optimisation
+  docs_query: migrate Azure Synapse Analytics to Microsoft Fabric guidance
+  questions:
+    - {id: components_in_use, prompt: "Which components are used: dedicated SQL, serverless SQL, Spark, or pipelines?", answer_type: text}
+    - {id: uses_ssis, prompt: "Are SSIS packages executed?", answer_type: boolean}
+    - {id: uses_mssparkutils, prompt: "Do notebooks call mssparkutils?", answer_type: boolean}
+  rules:
+    - when: {uses_ssis: true}
+      disposition: Blocked / Redesign Required
+      blockers: [SSIS execution requires retention or redesign; do not assume an as-is Fabric migration.]
+    - when: {uses_mssparkutils: true}
+      disposition: Needs Optimisation
+      actions: [Assess mssparkutils calls and replace them with supported notebookutils equivalents.]
+
+databricks:
+  label: Azure Databricks
+  target_pattern: Governed coexistence through OneLake or selected replatforming to Fabric Spark
+  base_disposition: Needs Optimisation
+  docs_query: migrate Azure Databricks to Microsoft Fabric OneLake guidance
+  questions:
+    - {id: migration_goal, prompt: "Is the goal coexistence, data sharing, or full replatforming?", answer_type: choice, options: [coexistence, data_sharing, replatform]}
+    - {id: uses_unity_catalog, prompt: "Does the workload depend on Unity Catalog?", answer_type: boolean}
+    - {id: uses_dlt, prompt: "Does it use Delta Live Tables?", answer_type: boolean}
+    - {id: custom_runtime, prompt: "Does it require custom runtimes, init scripts, or native libraries?", answer_type: boolean}
+  rules:
+    - when: {uses_dlt: true}
+      disposition: Blocked / Redesign Required
+      blockers: [The DLT pipeline requires an explicitly designed Fabric replacement.]
+      actions: [Evaluate Materialized Lake Views or pipeline-orchestrated notebooks using current documentation.]
+    - when: {custom_runtime: true}
+      disposition: Needs Optimisation
+      actions: [Prove library and runtime compatibility in a representative pilot.]
+
+adf:
+  label: Azure Data Factory
+  target_pattern: Fabric Data Factory pipelines, with retained ADF where feature parity is not proven
+  base_disposition: As-Is
+  docs_query: migrate Azure Data Factory pipelines to Microsoft Fabric limitations
+  questions:
+    - {id: uses_shir, prompt: "Does any connection depend on Self-hosted Integration Runtime?", answer_type: boolean}
+    - {id: uses_ssis, prompt: "Does any pipeline execute SSIS packages?", answer_type: boolean}
+    - {id: connector_inventory_complete, prompt: "Is the source, sink, activity, trigger, and connector inventory complete?", answer_type: boolean}
+  rules:
+    - when: {uses_shir: true}
+      disposition: Needs Optimisation
+      actions: [Validate each private or on-premises connection against supported Fabric connectivity.]
+    - when: {uses_ssis: true}
+      disposition: Blocked / Redesign Required
+      blockers: [SSIS package execution must be retained outside Fabric or redesigned.]
+    - when: {connector_inventory_complete: false}
+      disposition: Needs Discovery
+      actions: [Complete a connector and activity compatibility matrix before selecting migration scope.]
+
+logic_apps:
+  label: Azure Logic Apps
+  target_pattern: Keep application integration in Logic Apps; use Fabric only for data orchestration or supported alerting patterns
+  base_disposition: Keep Outside Fabric
+  docs_query: Microsoft Fabric Data Factory Activator Logic Apps integration guidance
+  questions:
+    - {id: primary_purpose, prompt: "Is the flow data movement, alerting, application integration, or human approval?", answer_type: choice, options: [data_movement, alerting, application_integration, human_approval]}
+    - {id: stateful, prompt: "Does it require state, callbacks, or long-running approvals?", answer_type: boolean}
+  rules:
+    - when: {primary_purpose: data_movement}
+      disposition: Needs Optimisation
+      actions: [Assess whether the data movement can be simplified into a Fabric pipeline.]
+    - when: {primary_purpose: alerting}
+      disposition: Needs Optimisation
+      actions: [Assess Fabric Activator only after validating source and action support.]
+
+spark_jobs:
+  label: Spark jobs
+  target_pattern: Fabric notebooks or Spark Job Definitions over a Lakehouse
+  base_disposition: As-Is
+  docs_query: migrate Spark jobs HDInsight to Microsoft Fabric notebookutils
+  questions:
+    - {id: platform, prompt: "Which platform currently runs the Spark workload?", answer_type: text}
+    - {id: uses_oozie, prompt: "Does orchestration depend on Oozie?", answer_type: boolean}
+    - {id: custom_runtime, prompt: "Are OS-level packages or custom cluster initialization required?", answer_type: boolean}
+  rules:
+    - when: {uses_oozie: true}
+      disposition: Needs Optimisation
+      actions: [Map Oozie actions and coordinators to supported Fabric orchestration.]
+    - when: {custom_runtime: true}
+      disposition: Blocked / Redesign Required
+      blockers: [Custom runtime requirements need a compatibility spike before commitment.]
+
+automation_runbooks:
+  label: Azure Automation runbooks
+  target_pattern: Keep control-plane automation in Azure Automation; move only validated data orchestration to Fabric
+  base_disposition: Keep Outside Fabric
+  docs_query: Microsoft Fabric REST API scheduling automation guidance
+  questions:
+    - {id: primary_purpose, prompt: "Is the runbook for resource management, data movement, or semantic-model refresh?", answer_type: choice, options: [resource_management, data_movement, model_refresh]}
+    - {id: dependencies_inventoried, prompt: "Are credentials, modules, webhooks, retries, and schedules inventoried?", answer_type: boolean}
+  rules:
+    - when: {primary_purpose: data_movement}
+      disposition: Needs Optimisation
+      actions: [Assess replacement with a governed Fabric pipeline.]
+    - when: {primary_purpose: model_refresh}
+      disposition: Needs Optimisation
+      actions: [Validate supported semantic-model refresh APIs and capacity-aware scheduling.]

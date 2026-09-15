@@ -1,0 +1,31 @@
+[project]
+name = "fabric-adoption-assistant"
+version = "0.2.0"
+description = "Grounded conversational Fabric adoption readiness assistant"
+requires-python = ">=3.10"
+dependencies = [
+    "jinja2>=3.1",
+    "pydantic>=2.6",
+    "pyyaml>=6.0",
+    "typer>=0.12",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+fabric-adoption = "fabric_adoption_assistant.cli:app"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"fabric_adoption_assistant" = ["templates/*.j2"]
+"fabric_adoption_assistant.data" = ["*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

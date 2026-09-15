@@ -1,0 +1,84 @@
+{
+  "customer_name": "Contoso Retail",
+  "engagement_owner": "Sushmitha",
+  "business_outcomes": [
+    "Consolidate analytics platforms",
+    "Improve data freshness"
+  ],
+  "constraints": [
+    "Private connectivity is mandatory"
+  ],
+  "assessments": [
+    {
+      "workload": {
+        "name": "Executive sales model",
+        "workload_type": "power_bi",
+        "size_gb": 28.0,
+        "answers": {
+          "storage_mode": "import",
+          "calculated_objects": true,
+          "gateway_required": false,
+          "peak_concurrent_users": 180
+        },
+        "notes": null,
+        "evidence": [
+          {
+            "title": "Microsoft Learn - Direct Lake overview",
+            "url": "https://learn.microsoft.com/power-bi/enterprise/directlake-overview",
+            "claim": "Storage-mode recommendation was checked against the current Direct Lake overview.",
+            "retrieved_on": "2026-09-15"
+          }
+        ]
+      },
+      "target_pattern": "Power BI semantic model using Import or Direct Lake after compatibility validation",
+      "disposition": "Needs Optimisation",
+      "blockers": [],
+      "actions": [
+        "Move reusable calculated-column logic upstream before choosing Direct Lake."
+      ],
+      "rationale": [
+        "Model-side features must be checked against the selected storage mode."
+      ],
+      "unanswered_questions": [],
+      "evidence": [
+        {
+          "title": "Microsoft Learn - Direct Lake overview",
+          "url": "https://learn.microsoft.com/power-bi/enterprise/directlake-overview",
+          "claim": "Storage-mode recommendation was checked against the current Direct Lake overview.",
+          "retrieved_on": "2026-09-15"
+        }
+      ],
+      "confidence_percent": 100,
+      "limitations": []
+    },
+    {
+      "workload": {
+        "name": "Retail ingestion",
+        "workload_type": "adf",
+        "size_gb": null,
+        "answers": {
+          "uses_shir": true,
+          "uses_ssis": false,
+          "connector_inventory_complete": false
+        },
+        "notes": null,
+        "evidence": []
+      },
+      "target_pattern": "Fabric Data Factory pipelines, with retained ADF where feature parity is not proven",
+      "disposition": "Needs Discovery",
+      "blockers": [],
+      "actions": [
+        "Validate each private or on-premises connection against supported Fabric connectivity.",
+        "Complete a connector and activity compatibility matrix before selecting migration scope."
+      ],
+      "rationale": [],
+      "unanswered_questions": [],
+      "evidence": [],
+      "confidence_percent": 100,
+      "limitations": [
+        "Required questions were answered, but a confirmed answer identifies unfinished discovery work.",
+        "No Microsoft Learn evidence snapshot is attached; validate recommendations before customer delivery."
+      ]
+    }
+  ]
+}

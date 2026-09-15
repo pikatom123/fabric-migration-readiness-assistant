@@ -1,0 +1,27 @@
+customer_name: Contoso Retail
+engagement_owner: Sushmitha
+business_outcomes:
+  - Consolidate analytics platforms
+  - Improve data freshness
+constraints:
+  - Private connectivity is mandatory
+workloads:
+  - name: Executive sales model
+    workload_type: power_bi
+    size_gb: 28
+    answers:
+      storage_mode: import
+      calculated_objects: true
+      gateway_required: false
+      peak_concurrent_users: 180
+    evidence:
+      - title: Microsoft Learn - Direct Lake overview
+        url: https://learn.microsoft.com/power-bi/enterprise/directlake-overview
+        claim: Storage-mode recommendation was checked against the current Direct Lake overview.
+        retrieved_on: 2026-09-15
+  - name: Retail ingestion
+    workload_type: adf
+    answers:
+      uses_shir: true
+      uses_ssis: false
+      connector_inventory_complete: false

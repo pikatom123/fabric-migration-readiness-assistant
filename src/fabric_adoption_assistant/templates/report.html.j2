@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fabric Adoption Readiness - {{ report.customer_name }}</title>
+  <style>
+    :root { --ink:#172026; --muted:#5d6b73; --paper:#fff; --canvas:#eef2f1; --line:#cbd5d1; --brand:#a4264c; --good:#177245; --warn:#a15c00; --bad:#b42318; --open:#42657a; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--canvas); font:15px/1.55 "Aptos", "Segoe UI", sans-serif; }
+    main { max-width:1160px; margin:auto; padding:36px 24px 64px; }
+    header { padding:36px; color:#fff; background:#263b43; border-bottom:7px solid var(--brand); }
+    header p { max-width:760px; color:#dce6e3; }
+    h1 { max-width:800px; margin:0 0 12px; font-size:42px; line-height:1.08; letter-spacing:0; }
+    h2 { margin:0 0 14px; font-size:22px; letter-spacing:0; }
+    h3 { margin:0 0 6px; font-size:18px; letter-spacing:0; }
+    .meta { display:flex; gap:18px; flex-wrap:wrap; margin-top:22px; font-size:13px; }
+    .metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:20px 0; }
+    .metric, .panel, .workload { background:var(--paper); border:1px solid var(--line); border-radius:8px; }
+    .metric { min-height:128px; padding:18px; }
+    .metric span { color:var(--muted); font-size:12px; text-transform:uppercase; }
+    .metric strong { display:block; margin:8px 0; font-size:30px; }
+    .panel { padding:22px; margin-top:16px; }
+    .workload { margin-top:16px; overflow:hidden; }
+    .workload-head { display:grid; grid-template-columns:1fr auto; gap:18px; padding:20px 22px; border-bottom:1px solid var(--line); }
+    .workload-body { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; padding:22px; }
+    .label { display:inline-flex; padding:5px 9px; border:1px solid currentColor; border-radius:999px; font-size:12px; font-weight:700; }
+    .As-Is { color:var(--good); } .Needs-Optimisation { color:var(--warn); } .Blocked--Redesign-Required { color:var(--bad); } .Keep-Outside-Fabric { color:#6451a1; } .Needs-Discovery { color:var(--open); }
+    ul { margin:8px 0 0; padding-left:19px; } li + li { margin-top:6px; }
+    .empty { color:var(--muted); }
+    .source { padding:10px 0; border-top:1px solid var(--line); }
+    .source:first-child { border-top:0; }
+    .source a { color:#0067a3; font-weight:700; }
+    .caution { padding:14px 16px; background:#fff6e5; border-left:4px solid var(--warn); }
+    @media (max-width:800px) { .metrics,.workload-body { grid-template-columns:1fr 1fr; } h1 { font-size:34px; } }
+    @media (max-width:560px) { main { padding:0 12px 40px; } header { margin:0 -12px; padding:28px 20px; } .metrics,.workload-body,.workload-head { grid-template-columns:1fr; } }
+    @media print { body { background:#fff; } main { max-width:none; padding:0; } header { print-color-adjust:exact; } .workload,.panel,.metric { break-inside:avoid; box-shadow:none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Fabric adoption readiness</h1>
+      <p>{{ report.customer_name }} - evidence-aware migration guidance from confirmed discovery answers. Unknowns remain visible rather than being converted into assumptions.</p>
+      <div class="meta"><span>Generated {{ generated_on }}</span>{% if report.engagement_owner %}<span>Owner: {{ report.engagement_owner }}</span>{% endif %}<span>{{ report.assessments|length }} workloads assessed</span></div>
+    </header>
+
+    <section class="metrics">
+      <article class="metric"><span>Question coverage</span><strong>{{ average_confidence }}%</strong><p>Required questions answered; not a success probability</p></article>
+      <article class="metric"><span>As-Is</span><strong>{{ counts['As-Is'] }}</strong><p>Subject to evidence validation</p></article>
+      <article class="metric"><span>Needs action</span><strong>{{ counts['Needs Optimisation'] + counts['Blocked / Redesign Required'] + counts['Needs Discovery'] }}</strong><p>Discovery, optimisation, or redesign</p></article>
+      <article class="metric"><span>Learn evidence</span><strong>{{ evidence_count }}</strong><p>Attached source snapshots</p></article>
+    </section>
+
+    <section class="panel">
+      <h2>Engagement context</h2>
+      <p><strong>Business outcomes:</strong> {{ report.business_outcomes|join('; ') if report.business_outcomes else 'Not captured' }}</p>
+      <p><strong>Constraints:</strong> {{ report.constraints|join('; ') if report.constraints else 'Not captured' }}</p>
+    </section>
+
+    {% for item in report.assessments %}
+    <article class="workload">
+      <div class="workload-head">
+        <div><h2>{{ item.workload.name }}</h2><p>{{ item.target_pattern }}</p></div>
+        <div><span class="label {{ item.disposition.value|replace(' ', '-')|replace('/', '-') }}">{{ item.disposition.value }}</span><p>{{ item.confidence_percent }}% question coverage</p></div>
+      </div>
+      <div class="workload-body">
+        <section><h3>Blockers and rationale</h3>{% if item.blockers or item.rationale %}<ul>{% for text in item.blockers + item.rationale %}<li>{{ text }}</li>{% endfor %}</ul>{% else %}<p class="empty">No blocker triggered by confirmed answers.</p>{% endif %}</section>
+        <section><h3>Actions</h3>{% if item.actions %}<ul>{% for text in item.actions %}<li>{{ text }}</li>{% endfor %}</ul>{% else %}<p class="empty">Standard pilot validation.</p>{% endif %}</section>
+        <section><h3>Open discovery</h3>{% if item.unanswered_questions %}<ul>{% for question in item.unanswered_questions %}<li>{{ question.prompt }}</li>{% endfor %}</ul>{% else %}<p class="empty">Required discovery complete.</p>{% endif %}</section>
+      </div>
+      <div class="panel" style="margin:0;border:0;border-top:1px solid var(--line);border-radius:0">
+        <h3>Evidence and limitations</h3>
+        {% for source in item.evidence %}<div class="source"><a href="{{ source.url }}">{{ source.title }}</a><div>{{ source.claim }} Retrieved {{ source.retrieved_on }}.</div></div>{% endfor %}
+        {% for limitation in item.limitations %}<p class="caution">{{ limitation }}</p>{% endfor %}
+      </div>
+    </article>
+    {% endfor %}
+  </main>
+</body>
+</html>

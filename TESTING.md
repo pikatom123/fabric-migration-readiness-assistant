@@ -42,6 +42,8 @@ Pass criteria:
 - Refreshing the page preserves the imported inventory in local storage.
 - A CSV without `name` and `workload_type` shows a clear error.
 - Unknown workload types are skipped and their row numbers are reported.
+- Assessment displays `N/A`, not `0%`, while every workload still needs discovery.
+- **Start AI discovery** produces estate context for the `Fabric Adoption Discovery` agent.
 
 PDF check:
 

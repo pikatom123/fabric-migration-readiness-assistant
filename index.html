@@ -464,10 +464,11 @@
           <div class="hero">
             <div>
               <h2>Inventory the analytics estate</h2>
-              <p>Add representative workloads and the features that materially affect migration. The assistant evaluates each workload independently and then checks estate-wide pressure.</p>
+              <p>Add or import workloads, then hand the estate to the Fabric Adoption agent for an adaptive, evidence-grounded discovery conversation.</p>
             </div>
-            <button class="btn primary" id="addWorkloadBtn">Add workload</button>
+            <div class="actions"><button class="btn" id="addWorkloadBtn">Add workload</button><button class="btn primary" id="startAiDiscoveryBtn">Start AI discovery</button></div>
           </div>
+          <div class="callout" id="aiDiscoveryStatus">Readiness is not calculated from inventory alone. Start AI discovery to confirm facts, resolve unknowns, and validate current Fabric guidance.</div>
           <div class="toolbar">
             <div class="field"><label for="filterType">Filter by technology</label><select id="filterType"><option value="">All technologies</option></select></div>
             <div class="muted" id="workloadCount"></div>
@@ -559,6 +560,16 @@
       </div>
       <div class="dialog-foot"><button class="btn" type="button" id="cancelDialogBtn">Cancel</button><button class="btn primary" type="submit">Save workload</button></div>
     </form>
+  </dialog>
+
+  <dialog id="aiDiscoveryDialog">
+    <div class="dialog-head"><h3>Continue with the Fabric Adoption agent</h3><button class="btn small" type="button" id="closeAiDiscoveryBtn">Close</button></div>
+    <div class="dialog-body">
+      <div class="callout">In VS Code Chat, select <strong>Fabric Adoption Discovery</strong> from the agent picker, then paste the context below. The agent will decide what to ask next; this page does not use a fixed questionnaire.</div>
+      <div class="field section-gap"><label for="aiDiscoveryPrompt">Estate context</label><textarea id="aiDiscoveryPrompt" rows="14" readonly></textarea></div>
+      <div class="upload-status" id="copyAiStatus" role="status">No readiness claim is made until the agent confirms the evidence and runs the assessment engine.</div>
+    </div>
+    <div class="dialog-foot"><button class="btn" type="button" id="downloadAiContextBtn">Download context</button><button class="btn primary" type="button" id="copyAiPromptBtn">Copy for Copilot Chat</button></div>
   </dialog>
 
   <script>
@@ -718,9 +729,10 @@
     function statusLabel(status) { return status === "ready" ? "Ready" : status === "optimize" ? "Optimise" : status === "discovery" ? "Needs Discovery" : "Redesign"; }
     function statusBadge(status) { return `<span class="badge ${status}"><span class="dot"></span>${statusLabel(status)}</span>`; }
     function score() {
-      if (!state.workloads.length) return 0;
+      const assessed = allAssessments().filter(item => item.status !== "discovery");
+      if (!assessed.length) return null;
       const points = {ready:100,optimize:65,blocked:25,discovery:0};
-      let result = allAssessments().reduce((sum,a) => sum + points[a.status], 0) / state.workloads.length;
+      let result = assessed.reduce((sum,a) => sum + points[a.status], 0) / assessed.length;
       const overlap = state.workloads.filter(w => w.features.includes("high-overlap")).length;
       if (overlap > 1) result -= 5;
       if (Number(state.context.governance) === 1) result -= 6;
@@ -749,7 +761,8 @@
       const assessments = allAssessments();
       const counts = {ready:0,optimize:0,blocked:0,discovery:0};
       assessments.forEach(a => counts[a.status]++);
-      document.getElementById("scoreRing").textContent = `${score()}%`;
+      const readiness = score();
+      document.getElementById("scoreRing").textContent = readiness === null ? "N/A" : `${readiness}%`;
       document.getElementById("assessmentMetrics").innerHTML = [
         ["Workloads",state.workloads.length,"In assessment scope"],
         ["Needs discovery",counts.discovery,"Imported or incomplete facts"],
@@ -781,8 +794,10 @@
       const total = assessments.length;
       const customer = state.context.customerName || "The customer";
       const readiness = score();
-      const disposition = readiness >= 80 ? "strong candidate for a phased Fabric migration" : readiness >= 55 ? "viable candidate with targeted optimisation and design work" : "candidate requiring blocker resolution and architecture validation before commitment";
-      document.getElementById("summaryLead").textContent = `${customer}: ${readiness}% directional readiness across ${total} workload${total === 1 ? "" : "s"}.`;
+      const disposition = readiness === null ? "not yet assessed" : readiness >= 80 ? "strong candidate for a phased Fabric migration" : readiness >= 55 ? "viable candidate with targeted optimisation and design work" : "candidate requiring blocker resolution and architecture validation before commitment";
+      document.getElementById("summaryLead").textContent = readiness === null
+        ? `${customer}: readiness is not yet assessed. Complete AI discovery for ${counts.discovery} workload${counts.discovery === 1 ? "" : "s"}.`
+        : `${customer}: ${readiness}% directional readiness across ${total} workload${total === 1 ? "" : "s"}.`;
       document.getElementById("executivePosition").textContent = total
         ? `${customer} is a ${disposition}. ${counts.discovery} workload${counts.discovery === 1 ? " needs" : "s need"} discovery, ${counts.ready} ${counts.ready === 1 ? "is" : "are"} ready for migration validation, ${counts.optimize} should be optimised, and ${counts.blocked} require redesign or dependency resolution.`
         : "No workloads have been assessed.";
@@ -899,6 +914,27 @@
       };
       reader.readAsText(file);
     }
+    function buildAiDiscoveryPrompt() {
+      readContext();
+      const payload = {
+        customer: state.context,
+        workloads: state.workloads.map(workload => ({
+          id: workload.id,
+          name: workload.name,
+          workload_type: workload.type,
+          size_gb: workload.size,
+          notes: workload.notes || null,
+          source_file: workload.sourceFile || null,
+          status: assess(workload).status
+        }))
+      };
+      return `Run an adaptive Fabric adoption discovery for this estate. Choose the highest-value next questions based on the evidence, ask no more than three at a time, use Microsoft Learn MCP for current product claims, and use relevant installed Fabric skills for deep workload checks. Do not infer missing facts or calculate readiness from inventory alone.\n\n${JSON.stringify(payload, null, 2)}`;
+    }
+    function openAiDiscovery() {
+      document.getElementById("aiDiscoveryPrompt").value = buildAiDiscoveryPrompt();
+      document.getElementById("copyAiStatus").textContent = "No readiness claim is made until the agent confirms the evidence and runs the assessment engine.";
+      document.getElementById("aiDiscoveryDialog").showModal();
+    }
     function renderAll() { setContext(); renderWorkloads(); renderAssessment(); renderSummary(); }
     function openWorkload(id) {
       const w = state.workloads.find(x => x.id === id);
@@ -937,6 +973,26 @@
       document.getElementById("featureChecks").innerHTML = FEATURES.map(([id,label]) => `<label class="check"><input type="checkbox" value="${id}"><span>${esc(label)}</span></label>`).join("");
       document.querySelectorAll(".nav button").forEach(b => b.onclick = () => switchView(b.dataset.view));
       document.getElementById("addWorkloadBtn").onclick = () => openWorkload();
+      document.getElementById("startAiDiscoveryBtn").onclick = openAiDiscovery;
+      document.getElementById("closeAiDiscoveryBtn").onclick = () => document.getElementById("aiDiscoveryDialog").close();
+      document.getElementById("copyAiPromptBtn").onclick = async () => {
+        const prompt = document.getElementById("aiDiscoveryPrompt").value;
+        try {
+          await navigator.clipboard.writeText(prompt);
+          document.getElementById("copyAiStatus").textContent = "Copied. Select Fabric Adoption Discovery in VS Code Chat and paste the context.";
+        } catch {
+          document.getElementById("aiDiscoveryPrompt").select();
+          document.getElementById("copyAiStatus").textContent = "Clipboard access was blocked. The context is selected for manual copy.";
+        }
+      };
+      document.getElementById("downloadAiContextBtn").onclick = () => {
+        const blob = new Blob([document.getElementById("aiDiscoveryPrompt").value], {type:"text/plain"});
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "fabric-adoption-discovery.txt";
+        link.click();
+        URL.revokeObjectURL(link.href);
+      };
       document.getElementById("uploadEstateBtn").onclick = () => document.getElementById("estateUpload").click();
       document.getElementById("estateUpload").onchange = event => {
         const file = event.target.files[0];

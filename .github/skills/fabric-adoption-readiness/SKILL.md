@@ -5,7 +5,7 @@ description: "Run a conversational, evidence-grounded Microsoft Fabric adoption 
 
 # Fabric Adoption Readiness
 
-Use the packaged Python engine as the source of truth. Conversation collects facts; it does not decide readiness.
+Use the `Fabric Adoption Discovery` custom agent for the interview. The agent chooses questions adaptively; the packaged Python engine validates the resulting evidence and applies repeatable readiness rules.
 
 ## Non-negotiable grounding rules
 
@@ -20,7 +20,7 @@ Use the packaged Python engine as the source of truth. Conversation collects fac
 
 ### 1. Establish scope
 
-Ask for the customer name, business outcomes, constraints, target date, and workload types. Ask at most three questions in one turn. Reflect back only confirmed answers.
+Start with the supplied estate and ask only the highest-value missing question. Ask at most three questions in one turn. Change the next question based on each answer; do not follow a fixed sequence. Reflect back only confirmed answers.
 
 If the user provides a PDF or CSV estate inventory, import it before asking them to repeat information:
 
@@ -43,13 +43,13 @@ python -m fabric_adoption_assistant.cli workloads
 
 ### 2. Discover each workload
 
-For every workload instance, capture its name, type, approximate size when known, and notes. Get the next question batch from the engine:
+For every workload instance, capture its name, type, approximate size when known, and notes. Use the engine's question metadata as a coverage checklist, not as a mandatory order. The agent may ask a more specific question when it resolves the same field without loss of meaning.
 
 ```powershell
 python -m fabric_adoption_assistant.cli questions <workload_type> --answers-json '<confirmed-json>'
 ```
 
-Use the returned question ids exactly as keys in `answers`. Do not add guessed defaults. Resolve ambiguous answers with a follow-up rather than normalizing silently.
+Map confirmed answers to the returned question ids when writing the intake. Do not add guessed defaults. Resolve ambiguous answers with a follow-up rather than normalizing silently.
 
 For imported inventories, present a compact confirmation table containing source location, proposed workload name, proposed type, size, and notes. Label the table `Unconfirmed extraction`. Only move confirmed entries into the assessment intake.
 

@@ -62,6 +62,11 @@ python -m venv .venv
 .venv\Scripts\python -m fabric_adoption_assistant.cli workloads
 .venv\Scripts\python -m fabric_adoption_assistant.cli questions power_bi
 
+# Import an existing estate inventory for conversational confirmation
+.venv\Scripts\python -m fabric_adoption_assistant.cli import-estate examples/sample_estate.csv `
+	--customer-name "Contoso Retail" `
+	--output examples/estate-import.json
+
 # Generate consistent JSON and customer-ready HTML
 .venv\Scripts\python -m fabric_adoption_assistant.cli assess examples/sample_intake.yaml `
 	--json-out examples/sample_report.json `
@@ -71,6 +76,37 @@ python -m venv .venv
 ```
 
 Open `examples/sample_report.html` directly in a browser. It has no server or external asset dependency and prints cleanly to PDF.
+
+## Estate uploads
+
+The Discovery screen in `index.html` includes an **Upload PDF or CSV** button.
+
+CSV files are imported immediately in the browser using this contract:
+
+| Column | Required | Meaning |
+|---|---|---|
+| `name` | Yes | Customer-facing workload name |
+| `workload_type` | Yes | Supported canonical type or alias such as `Power BI`, `Azure SQL`, or `ADF` |
+| `size_gb` | No | Non-negative approximate size |
+| `notes` | No | Source notes copied without interpretation |
+
+Every browser-imported workload is marked **Needs Discovery**. The upload does not infer feature flags or readiness.
+
+PDFs require text extraction and conversational confirmation. Selecting a PDF in the standalone page records no workload facts because a browser-only page cannot safely call the packaged Python parser. Attach the PDF in Copilot Chat, or run `import-estate`; the skill then presents an unconfirmed inventory for review. Scanned pages with no text are reported as requiring OCR.
+
+See `TESTING.md` for the acceptance test and customer pilot checklist.
+
+## Microsoft Learn MCP
+
+The branch includes `.vscode/mcp.json` configured for Microsoft's public Streamable HTTP endpoint:
+
+```text
+https://learn.microsoft.com/api/mcp
+```
+
+There is no authentication requirement. After opening the repository in VS Code, start or approve the `microsoft-learn` MCP server when prompted. The conversational skill uses `microsoft_docs_search` to discover current documentation and `microsoft_docs_fetch` to open the selected source before attaching a claim.
+
+The endpoint and operating model are documented in the official [Microsoft Learn MCP Server overview](https://learn.microsoft.com/en-us/training/support/mcp). If the server is unavailable, the workflow must retain an evidence limitation rather than answer from model memory.
 
 ## Managing knowledge
 

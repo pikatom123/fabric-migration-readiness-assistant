@@ -29,6 +29,7 @@ class WorkloadInput(BaseModel):
     size_gb: float | None = Field(default=None, ge=0)
     answers: dict[str, Any] = Field(default_factory=dict)
     notes: str | None = None
+    source_reference: str | None = None
     evidence: list[EvidenceSource] = Field(default_factory=list)
 
 

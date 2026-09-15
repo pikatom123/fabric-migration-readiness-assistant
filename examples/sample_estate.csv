@@ -1,0 +1,4 @@
+name,workload_type,size_gb,notes
+Executive sales model,Power BI,28,Shared finance and retail model
+Retail ingestion,Azure Data Factory,2600,Connects stores and on-premises SQL Server
+Order processing database,Azure SQL,1200,Operational source used for analytics

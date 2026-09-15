@@ -9,6 +9,7 @@ import yaml
 
 from .discovery import discovery_progress, supported_workloads
 from .engine import assess
+from .importers import import_estate
 from .models import AssessmentInput
 from .report import render_html
 
@@ -29,6 +30,24 @@ def questions_command(
     """Return the next conversational discovery questions."""
     answers = json.loads(answers_json)
     typer.echo(json.dumps(discovery_progress(workload_type, answers), indent=2))
+
+
+@app.command("import-estate")
+def import_estate_command(
+    source: Path,
+    customer_name: str = typer.Option(..., help="Customer name for the discovery draft"),
+    output: Path = typer.Option(Path("estate-import.json")),
+) -> None:
+    """Import CSV inventory or extract PDF text into a review-first discovery draft."""
+    result = import_estate(source, customer_name)
+    output.write_text(result.model_dump_json(indent=2), encoding="utf-8")
+    typer.echo(f"Wrote {output}")
+    typer.echo(
+        f"Imported {len(result.workloads)} workload(s); "
+        f"extracted {len(result.extracted_pages)} PDF page(s); "
+        f"found {len(result.issues)} issue(s)."
+    )
+    typer.echo("Confirmation is required before assessment.")
 
 
 @app.command("assess")

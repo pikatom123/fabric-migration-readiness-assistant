@@ -12,7 +12,7 @@ Use the packaged Python engine as the source of truth. Conversation collects fac
 1. Label information as one of: `Customer answer`, `Microsoft Learn evidence`, or `Assessment rule`.
 2. Never infer an unanswered field. Leave it absent so the engine returns `Needs Discovery`.
 3. Never invent product support, limits, migration parity, URLs, quotes, or SKU recommendations.
-4. Search Microsoft Learn through the available Microsoft Learn MCP tools before asserting current product behavior. Attach only sources actually returned and opened during this session.
+4. Search Microsoft Learn through `microsoft_docs_search`, open the selected article with `microsoft_docs_fetch`, and use `microsoft_code_sample_search` only when implementation examples are needed. Attach only sources actually returned and opened during this session.
 5. If Learn MCP is unavailable or inconclusive, record the statement as a validation action and add an evidence limitation. Do not convert it into a fact.
 6. Treat capacity guidance as directional. Use measured telemetry and the Fabric SKU Estimator or cost-estimation skill for sizing.
 
@@ -21,6 +21,19 @@ Use the packaged Python engine as the source of truth. Conversation collects fac
 ### 1. Establish scope
 
 Ask for the customer name, business outcomes, constraints, target date, and workload types. Ask at most three questions in one turn. Reflect back only confirmed answers.
+
+If the user provides a PDF or CSV estate inventory, import it before asking them to repeat information:
+
+```powershell
+python -m fabric_adoption_assistant.cli import-estate <estate.pdf-or-csv> \
+  --customer-name <customer> \
+  --output <customer>-estate-import.json
+```
+
+- CSV: Treat `name`, `workload_type`, `size_gb`, and `notes` as imported source fields. The importer intentionally leaves all assessment `answers` empty.
+- PDF: Treat extracted page text as an unconfirmed source document. Propose candidate workloads with the page number and exact supporting text, then ask the user to confirm or correct them.
+- Never assess directly from a PDF extraction or an uploaded row. Confirm the inventory first, then run the workload-specific questions.
+- If a PDF page has no extractable text, state that OCR is required. Do not guess from an empty or unreadable page.
 
 List supported workload types when needed:
 
@@ -38,9 +51,11 @@ python -m fabric_adoption_assistant.cli questions <workload_type> --answers-json
 
 Use the returned question ids exactly as keys in `answers`. Do not add guessed defaults. Resolve ambiguous answers with a follow-up rather than normalizing silently.
 
+For imported inventories, present a compact confirmation table containing source location, proposed workload name, proposed type, size, and notes. Label the table `Unconfirmed extraction`. Only move confirmed entries into the assessment intake.
+
 ### 3. Ground current product claims
 
-Use the returned `docs_query` with Microsoft Learn MCP search. Open the relevant Learn result before using it. For each claim retained in the assessment, record:
+Use the returned `docs_query` with `microsoft_docs_search`. Open the relevant Learn result with `microsoft_docs_fetch` before using it. For each claim retained in the assessment, record:
 
 ```yaml
 evidence:

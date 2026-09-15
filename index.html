@@ -191,6 +191,17 @@
     }
     .card h3 { margin: 0 0 4px; font-size: 16px; }
     .card-sub { color: var(--cp-text-muted); font-size: 12px; margin-bottom: 18px; }
+    .upload-card {
+      margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      border-left: 4px solid var(--cp-accent);
+    }
+    .upload-card p { margin: 6px 0 0; color: var(--cp-text-muted); line-height: 1.5; }
+    .upload-status { margin-top: 10px; color: var(--cp-text-muted); font-size: 12px; }
+    .upload-status.error { color: var(--cp-danger); }
     .grid { display: grid; gap: 16px; }
     .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -254,6 +265,7 @@
     .badge.ready { color: var(--cp-success); border-color: var(--cp-success); }
     .badge.optimize { color: var(--cp-warning); border-color: var(--cp-warning); }
     .badge.blocked { color: var(--cp-danger); border-color: var(--cp-danger); }
+    .badge.discovery { color: var(--cp-link); border-color: var(--cp-link); }
     .badge.neutral { color: var(--cp-text-muted); }
     .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
     .assessment-list { display: grid; gap: 14px; }
@@ -362,6 +374,7 @@
       .assessment-head { grid-template-columns: 1fr; gap: 8px; }
       .checks { grid-template-columns: 1fr; }
       .estimator { grid-template-columns: 1fr; }
+      .upload-card { grid-template-columns: 1fr; }
     }
     @media print {
       .sidebar, .topbar, .no-print, dialog { display: none !important; }
@@ -410,6 +423,17 @@
             <div>
               <h2>Understand the migration ambition</h2>
               <p>Capture the customer, target outcomes, operating constraints, and scale assumptions that influence the recommended Fabric architecture.</p>
+            </div>
+          </div>
+          <div class="card upload-card">
+            <div>
+              <h3>Bring your estate inventory</h3>
+              <p>Import a CSV inventory now, or select a PDF for conversational review. Imported facts remain <strong>Needs Discovery</strong> until you confirm the workload-specific questions.</p>
+              <div class="upload-status" id="uploadStatus" role="status">CSV columns: name, workload_type, size_gb, notes. PDF extraction uses the packaged CLI or Copilot skill.</div>
+            </div>
+            <div>
+              <input class="hide" id="estateUpload" type="file" accept=".csv,.pdf,text/csv,application/pdf">
+              <button class="btn primary" id="uploadEstateBtn" type="button">Upload PDF or CSV</button>
             </div>
           </div>
           <div class="card">
@@ -580,7 +604,7 @@
     let currentView = "discovery";
 
     function emptyState() {
-      return {context:{customerName:"",industry:"",region:"UK South",targetDate:"",users:250,concurrentUsers:40,governance:"2",strategy:"Balanced",outcomes:"",constraints:""},workloads:[]};
+      return {context:{customerName:"",industry:"",region:"UK South",targetDate:"",users:250,concurrentUsers:40,governance:"2",strategy:"Balanced",outcomes:"",constraints:""},workloads:[],imports:[]};
     }
     function loadState() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || emptyState(); }
@@ -614,6 +638,16 @@
       const has = f => w.features.includes(f);
       const optimise = message => { if (status === "ready") status = "optimize"; optimisations.push(message); };
       const block = message => { status = "blocked"; risks.push(message); };
+
+      if (w.discoveryPending) {
+        return {
+          status: "discovery",
+          pattern: "Confirm inventory details in conversational discovery",
+          risks: [],
+          optimisations: [],
+          questions: ["Confirm this imported workload and answer its required compatibility questions before assessment."]
+        };
+      }
 
       switch (w.type) {
         case "Power BI":
@@ -681,11 +715,11 @@
       return {status, pattern, risks, optimisations:[...new Set(optimisations)], questions};
     }
     function allAssessments() { return state.workloads.map(w => ({workload:w, ...assess(w)})); }
-    function statusLabel(status) { return status === "ready" ? "Ready" : status === "optimize" ? "Optimise" : "Redesign"; }
+    function statusLabel(status) { return status === "ready" ? "Ready" : status === "optimize" ? "Optimise" : status === "discovery" ? "Needs Discovery" : "Redesign"; }
     function statusBadge(status) { return `<span class="badge ${status}"><span class="dot"></span>${statusLabel(status)}</span>`; }
     function score() {
       if (!state.workloads.length) return 0;
-      const points = {ready:100,optimize:65,blocked:25};
+      const points = {ready:100,optimize:65,blocked:25,discovery:0};
       let result = allAssessments().reduce((sum,a) => sum + points[a.status], 0) / state.workloads.length;
       const overlap = state.workloads.filter(w => w.features.includes("high-overlap")).length;
       if (overlap > 1) result -= 5;
@@ -713,12 +747,12 @@
     }
     function renderAssessment() {
       const assessments = allAssessments();
-      const counts = {ready:0,optimize:0,blocked:0};
+      const counts = {ready:0,optimize:0,blocked:0,discovery:0};
       assessments.forEach(a => counts[a.status]++);
       document.getElementById("scoreRing").textContent = `${score()}%`;
       document.getElementById("assessmentMetrics").innerHTML = [
         ["Workloads",state.workloads.length,"In assessment scope"],
-        ["Ready",counts.ready,"Can move with validation"],
+        ["Needs discovery",counts.discovery,"Imported or incomplete facts"],
         ["Optimise",counts.optimize,"Tune before or during migration"],
         ["Redesign",counts.blocked,"Blocking dependency identified"]
       ].map(x => `<div class="metric"><div class="metric-label">${x[0]}</div><div class="metric-value">${x[1]}</div><div class="metric-note">${x[2]}</div></div>`).join("");
@@ -742,7 +776,7 @@
     }
     function renderSummary() {
       const assessments = allAssessments();
-      const counts = {ready:0,optimize:0,blocked:0};
+      const counts = {ready:0,optimize:0,blocked:0,discovery:0};
       assessments.forEach(a => counts[a.status]++);
       const total = assessments.length;
       const customer = state.context.customerName || "The customer";
@@ -750,7 +784,7 @@
       const disposition = readiness >= 80 ? "strong candidate for a phased Fabric migration" : readiness >= 55 ? "viable candidate with targeted optimisation and design work" : "candidate requiring blocker resolution and architecture validation before commitment";
       document.getElementById("summaryLead").textContent = `${customer}: ${readiness}% directional readiness across ${total} workload${total === 1 ? "" : "s"}.`;
       document.getElementById("executivePosition").textContent = total
-        ? `${customer} is a ${disposition}. ${counts.ready} workload${counts.ready === 1 ? " is" : "s are"} ready for migration validation, ${counts.optimize} should be optimised, and ${counts.blocked} require redesign or dependency resolution. A phased approach should prove connectivity, semantic model compatibility, and peak-capacity behavior before scaling.`
+        ? `${customer} is a ${disposition}. ${counts.discovery} workload${counts.discovery === 1 ? " needs" : "s need"} discovery, ${counts.ready} ${counts.ready === 1 ? "is" : "are"} ready for migration validation, ${counts.optimize} should be optimised, and ${counts.blocked} require redesign or dependency resolution.`
         : "No workloads have been assessed.";
 
       const patterns = {};
@@ -760,6 +794,7 @@
         : `<span class="muted">No target patterns generated.</span>`;
 
       const steps = [];
+      if (counts.discovery) steps.push("Confirm imported inventory facts and complete the conversational workload questions before using readiness results.");
       if (counts.blocked) steps.push("Run focused design workshops for the redesign workloads and agree which dependencies stay on Azure services.");
       if (assessments.some(a => a.workload.type.includes("SSAS") || a.workload.type === "Power BI")) steps.push("Complete a semantic-model compatibility scan and benchmark representative DAX queries in Direct Lake.");
       if (assessments.some(a => a.workload.features.includes("self-hosted-ir") || a.workload.features.includes("private-network"))) steps.push("Prove end-to-end private connectivity, gateway placement, identity, and connector support.");
@@ -771,7 +806,7 @@
       const questions = [...new Set(assessments.flatMap(a => a.questions))].slice(0,6);
       document.getElementById("summaryQuestions").innerHTML = questions.length ? questions.map(q => `<li>${esc(q)}</li>`).join("") : `<li>Confirm workload owners, SLAs, critical reporting windows, and acceptance criteria.</li>`;
 
-      document.getElementById("statusProfile").innerHTML = ["ready","optimize","blocked"].map(status => {
+      document.getElementById("statusProfile").innerHTML = ["ready","discovery","optimize","blocked"].map(status => {
         const pct = total ? Math.round(counts[status] / total * 100) : 0;
         return `<div class="status-row">${statusBadge(status)}<div class="bar"><span style="width:${pct}%"></span></div><strong>${counts[status]}</strong></div>`;
       }).join("");
@@ -798,6 +833,72 @@
         : "Capacity position: no obvious high-pressure signal from current inputs, but validate run duration and peak concurrency with telemetry.";
     }
     function formatSize(gb) { return gb >= 1000 ? `${(gb/1000).toFixed(1)} TB` : `${Math.round(gb).toLocaleString()} GB`; }
+    function parseCsv(text) {
+      const rows = [];
+      let row = [], value = "", quoted = false;
+      for (let index = 0; index < text.length; index++) {
+        const char = text[index];
+        if (char === '"' && quoted && text[index + 1] === '"') { value += '"'; index++; }
+        else if (char === '"') quoted = !quoted;
+        else if (char === "," && !quoted) { row.push(value); value = ""; }
+        else if ((char === "\n" || char === "\r") && !quoted) {
+          if (char === "\r" && text[index + 1] === "\n") index++;
+          row.push(value); value = "";
+          if (row.some(cell => cell.trim())) rows.push(row);
+          row = [];
+        } else value += char;
+      }
+      row.push(value);
+      if (row.some(cell => cell.trim())) rows.push(row);
+      return rows;
+    }
+    function normalizeImportedType(value) {
+      const aliases = {
+        "power bi":"Power BI", "powerbi":"Power BI", "ssas":"SSAS / Azure Analysis Services",
+        "azure analysis services":"SSAS / Azure Analysis Services", "aas":"SSAS / Azure Analysis Services",
+        "azure sql":"Azure SQL", "synapse":"Synapse", "azure synapse":"Synapse",
+        "databricks":"Databricks", "azure databricks":"Databricks", "adf":"Azure Data Factory",
+        "azure data factory":"Azure Data Factory", "logic apps":"Logic Apps", "azure logic apps":"Logic Apps",
+        "spark":"Spark jobs", "spark jobs":"Spark jobs", "automation runbooks":"Automation runbooks",
+        "azure automation":"Automation runbooks"
+      };
+      return aliases[String(value || "").trim().toLowerCase().replaceAll("_", " ").replaceAll("-", " ")] || null;
+    }
+    function importCsvFile(file) {
+      const status = document.getElementById("uploadStatus");
+      const reader = new FileReader();
+      reader.onerror = () => { status.className = "upload-status error"; status.textContent = "The CSV could not be read."; };
+      reader.onload = () => {
+        const rows = parseCsv(String(reader.result || ""));
+        const headers = (rows.shift() || []).map(header => header.trim().toLowerCase());
+        const nameIndex = headers.indexOf("name"), typeIndex = headers.indexOf("workload_type");
+        if (nameIndex < 0 || typeIndex < 0) {
+          status.className = "upload-status error";
+          status.textContent = "CSV must contain name and workload_type columns.";
+          return;
+        }
+        const sizeIndex = headers.indexOf("size_gb"), notesIndex = headers.indexOf("notes");
+        const imported = [], skipped = [];
+        rows.forEach((row, index) => {
+          const name = String(row[nameIndex] || "").trim();
+          const type = normalizeImportedType(row[typeIndex]);
+          const rawSize = sizeIndex >= 0 ? String(row[sizeIndex] || "").trim() : "";
+          const size = rawSize && Number.isFinite(Number(rawSize)) && Number(rawSize) >= 0 ? Number(rawSize) : 0;
+          if (!name || !type) { skipped.push(index + 2); return; }
+          imported.push({
+            id:`import-${Date.now()}-${index}`, name, type, size, refresh:0, concurrency:0,
+            complexity:"Unknown", features:[], notes:notesIndex >= 0 ? String(row[notesIndex] || "").trim() : "",
+            discoveryPending:true, sourceFile:file.name
+          });
+        });
+        state.workloads.push(...imported);
+        state.imports = [...(state.imports || []), {name:file.name,type:"csv",count:imported.length}];
+        saveState(); renderAll();
+        status.className = skipped.length ? "upload-status error" : "upload-status";
+        status.textContent = `Imported ${imported.length} workload${imported.length === 1 ? "" : "s"} from ${file.name} as Needs Discovery.${skipped.length ? ` Skipped rows: ${skipped.join(", ")}.` : ""}`;
+      };
+      reader.readAsText(file);
+    }
     function renderAll() { setContext(); renderWorkloads(); renderAssessment(); renderSummary(); }
     function openWorkload(id) {
       const w = state.workloads.find(x => x.id === id);
@@ -836,6 +937,20 @@
       document.getElementById("featureChecks").innerHTML = FEATURES.map(([id,label]) => `<label class="check"><input type="checkbox" value="${id}"><span>${esc(label)}</span></label>`).join("");
       document.querySelectorAll(".nav button").forEach(b => b.onclick = () => switchView(b.dataset.view));
       document.getElementById("addWorkloadBtn").onclick = () => openWorkload();
+      document.getElementById("uploadEstateBtn").onclick = () => document.getElementById("estateUpload").click();
+      document.getElementById("estateUpload").onchange = event => {
+        const file = event.target.files[0];
+        if (!file) return;
+        if (file.name.toLowerCase().endsWith(".csv")) importCsvFile(file);
+        else {
+          state.imports = [...(state.imports || []), {name:file.name,type:"pdf",count:0}];
+          saveState();
+          const status = document.getElementById("uploadStatus");
+          status.className = "upload-status";
+          status.textContent = `${file.name} selected. Attach this PDF in Copilot Chat for conversational extraction, or run the import-estate CLI. No workload facts were inferred.`;
+        }
+        event.target.value = "";
+      };
       document.getElementById("filterType").onchange = renderWorkloads;
       document.getElementById("sampleBtn").onclick = () => { state = JSON.parse(JSON.stringify(sampleState)); saveState(); renderAll(); };
       document.getElementById("resetBtn").onclick = () => { if (confirm("Reset the assessment and remove all workloads?")) { state = emptyState(); localStorage.removeItem(STORAGE_KEY); renderAll(); switchView("discovery"); } };

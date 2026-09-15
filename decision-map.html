@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fabric Solution Decision Map</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("clawpilotTheme");
+      const theme = param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--cp-bg); color: var(--cp-text); font: 14px "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+    a { color: var(--cp-link); }
+    header { position: sticky; top: 0; z-index: 20; min-height: 66px; padding: 11px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--cp-border); background: var(--cp-panel-strong); }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; background: var(--cp-accent); color: var(--cp-accent-fg); font-size: 18px; font-weight: 800; }
+    .brand strong, .brand span { display: block; }
+    .brand span { margin-top: 2px; color: var(--cp-text-muted); font-size: 11px; }
+    .header-actions, .tabs, .filters { display: flex; align-items: center; gap: 7px; }
+    .btn { min-height: 36px; padding: 7px 12px; border: 1px solid var(--cp-border); border-radius: 10px; background: var(--cp-surface); color: var(--cp-text); font-weight: 650; }
+    .btn:hover { border-color: var(--cp-border-strong); }
+    .btn.primary { border-color: var(--cp-accent); background: var(--cp-accent); color: var(--cp-accent-fg); }
+    .btn.primary:hover { background: var(--cp-accent-hover); }
+    .btn.icon { width: 38px; padding: 0; font-size: 17px; }
+    main { width: 100%; max-width: 1680px; margin: 0 auto; padding: 25px 28px 40px; }
+    .intro { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 24px; margin-bottom: 20px; }
+    .eyebrow { margin: 0 0 6px; color: var(--cp-accent); font-size: 11px; font-weight: 750; text-transform: uppercase; }
+    h1 { margin: 0; font-size: 29px; line-height: 1.16; letter-spacing: 0; }
+    .intro p:last-child { max-width: 770px; margin: 8px 0 0; color: var(--cp-text-muted); line-height: 1.5; }
+    .coverage { min-width: 245px; }
+    .coverage-copy { display: flex; justify-content: space-between; margin-bottom: 7px; color: var(--cp-text-muted); font-size: 11px; }
+    .coverage-copy strong { color: var(--cp-text); }
+    .track { height: 7px; overflow: hidden; border-radius: 10px; background: var(--cp-border); }
+    .fill { width: 0; height: 100%; background: var(--cp-accent); transition: width 200ms ease; }
+    .commandbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 10px 12px; margin-bottom: 17px; border: 1px solid var(--cp-border); border-radius: 10px; background: var(--cp-surface); }
+    .tab { min-height: 34px; padding: 6px 11px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--cp-text-muted); font-size: 12px; font-weight: 700; }
+    .tab.active { border-color: var(--cp-accent); background: var(--cp-accent-soft); color: var(--cp-accent); }
+    .legend { display: flex; gap: 14px; color: var(--cp-text-muted); font-size: 11px; }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cp-border-strong); }
+    .dot.decided { background: var(--cp-success); }
+    .dot.review { background: var(--cp-warning); }
+    .view { display: none; }
+    .view.active { display: block; }
+    .map-layout { display: grid; grid-template-columns: minmax(0, 1fr) 430px; gap: 17px; align-items: start; }
+    .graph-shell { min-height: 675px; padding: 18px; border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-bg-elevated); overflow: auto; }
+    .graph-title { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    .graph-title strong { font-size: 13px; }
+    .graph-title span { color: var(--cp-text-muted); font-size: 11px; }
+    .graph { position: relative; min-width: 760px; display: grid; grid-template-columns: repeat(4, minmax(165px, 1fr)); gap: 14px; }
+    .graph::before { content: ""; position: absolute; left: 8%; right: 8%; top: 61px; height: 1px; background: var(--cp-border-strong); }
+    .stage { position: relative; min-width: 0; }
+    .stage-head { position: relative; z-index: 1; height: 62px; padding: 7px 9px; background: var(--cp-bg-elevated); }
+    .stage-number { width: 24px; height: 24px; display: grid; place-items: center; margin-bottom: 5px; border-radius: 50%; background: var(--cp-accent); color: var(--cp-accent-fg); font-size: 11px; font-weight: 800; }
+    .stage-head strong { display: block; font-size: 11px; text-transform: uppercase; }
+    .nodes { display: grid; gap: 11px; }
+    .node { width: 100%; min-height: 122px; padding: 13px; text-align: left; border: 1px solid var(--cp-border); border-radius: 10px; background: var(--cp-surface); color: var(--cp-text); transition: transform 150ms ease, border-color 150ms ease; }
+    .node:hover { transform: translateY(-2px); border-color: var(--cp-border-strong); }
+    .node.selected { border: 2px solid var(--cp-accent); padding: 12px; background: var(--cp-accent-soft); }
+    .node-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .node-icon { color: var(--cp-accent); font-size: 17px; }
+    .node h3 { margin: 11px 0 5px; font-size: 13px; }
+    .node-choice { min-height: 30px; color: var(--cp-text-muted); font-size: 11px; line-height: 1.35; }
+    .node-deps { margin-top: 8px; color: var(--cp-text-soft); font-size: 10px; }
+    .status { width: 9px; height: 9px; border-radius: 50%; background: var(--cp-border-strong); }
+    .node[data-status="decided"] .status { background: var(--cp-success); }
+    .node[data-status="review"] .status { background: var(--cp-warning); }
+    .detail { position: sticky; top: 83px; max-height: calc(100vh - 101px); overflow: auto; border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-surface); }
+    .detail-head { padding: 18px 20px 16px; border-bottom: 1px solid var(--cp-border); }
+    .detail-kicker { color: var(--cp-accent); font-size: 10px; font-weight: 750; text-transform: uppercase; }
+    .detail h2 { margin: 6px 0 0; font-size: 20px; }
+    .detail-desc { margin: 8px 0 0; color: var(--cp-text-muted); font-size: 12px; line-height: 1.45; }
+    .detail-body { padding: 17px 20px 22px; }
+    .section-label { margin: 0 0 9px; color: var(--cp-text-muted); font-size: 10px; font-weight: 750; text-transform: uppercase; }
+    .guide { margin-bottom: 17px; padding: 11px; border: 1px solid var(--cp-border); border-radius: 10px; background: var(--cp-surface-soft); }
+    .guide ul { margin: 0; padding-left: 17px; color: var(--cp-text-muted); font-size: 10px; line-height: 1.5; }
+    .validation { margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--cp-border); color: var(--cp-text-muted); font-size: 10px; line-height: 1.4; }
+    .validation strong { color: var(--cp-text); }
+    .options { display: grid; gap: 8px; }
+    .option { width: 100%; padding: 11px; text-align: left; border: 1px solid var(--cp-border); border-radius: 10px; background: var(--cp-bg-elevated); color: var(--cp-text); }
+    .option:hover { border-color: var(--cp-border-strong); }
+    .option.selected { border-color: var(--cp-accent); background: var(--cp-accent-soft); }
+    .option strong { display: block; font-size: 12px; }
+    .option span { display: block; margin-top: 3px; color: var(--cp-text-muted); font-size: 10px; line-height: 1.35; }
+    .evidence { margin-top: 17px; padding-top: 16px; border-top: 1px solid var(--cp-border); }
+    .choice-title { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .choice-title h3 { margin: 0; font-size: 15px; }
+    .badge { padding: 3px 7px; border-radius: 8px; background: var(--cp-accent-soft); color: var(--cp-accent); font-size: 9px; font-weight: 750; text-transform: uppercase; }
+    .rationale { margin: 8px 0 13px; color: var(--cp-text-muted); font-size: 11px; line-height: 1.45; }
+    .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .tradeoff { padding: 10px; border-radius: 10px; background: var(--cp-surface-soft); }
+    .tradeoff strong { display: block; margin-bottom: 5px; font-size: 10px; text-transform: uppercase; }
+    .tradeoff.pro strong { color: var(--cp-success); }
+    .tradeoff.con strong { color: var(--cp-warning); }
+    .tradeoff ul { margin: 0; padding-left: 15px; color: var(--cp-text-muted); font-size: 10px; line-height: 1.45; }
+    .evidence-link { display: inline-block; margin-top: 12px; font-size: 10px; }
+    .field { display: grid; gap: 6px; margin-top: 16px; }
+    .field label { color: var(--cp-text-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    textarea { width: 100%; min-height: 75px; resize: vertical; padding: 9px; border: 1px solid var(--cp-border); border-radius: 10px; background: var(--cp-bg-elevated); color: var(--cp-text); outline: none; }
+    textarea:focus { border-color: var(--cp-accent); }
+    .impact { margin-top: 13px; padding: 10px; border-left: 3px solid var(--cp-warning); background: var(--cp-surface-soft); color: var(--cp-text-muted); font-size: 10px; line-height: 1.4; }
+    .roadmap-shell, .log-shell { border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-surface); overflow: hidden; }
+    .view-head { padding: 19px 21px; display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--cp-border); }
+    .view-head h2 { margin: 0 0 4px; font-size: 18px; }
+    .view-head p { margin: 0; color: var(--cp-text-muted); font-size: 11px; }
+    .roadmap { display: grid; grid-template-columns: repeat(4, 1fr); }
+    .road-phase { min-width: 0; padding: 18px; border-right: 1px solid var(--cp-border); }
+    .road-phase:last-child { border: 0; }
+    .phase-meta { color: var(--cp-accent); font-size: 10px; font-weight: 750; text-transform: uppercase; }
+    .road-phase h3 { margin: 5px 0 15px; font-size: 15px; }
+    .road-items { display: grid; gap: 9px; }
+    .road-item { padding: 10px; border: 1px solid var(--cp-border); border-radius: 10px; background: var(--cp-bg-elevated); }
+    .road-item strong { display: block; font-size: 11px; line-height: 1.35; }
+    .road-item span { display: block; margin-top: 4px; color: var(--cp-text-muted); font-size: 9px; }
+    .road-item.review { border-left: 3px solid var(--cp-warning); }
+    .empty { padding: 45px 20px; text-align: center; color: var(--cp-text-muted); }
+    .log-list { display: grid; }
+    .log-item { display: grid; grid-template-columns: 140px 190px 1fr; gap: 18px; padding: 14px 20px; border-bottom: 1px solid var(--cp-border); font-size: 11px; }
+    .log-item:last-child { border: 0; }
+    .log-item time, .log-item span { color: var(--cp-text-muted); }
+    @media (max-width: 1100px) { .map-layout { grid-template-columns: minmax(0, 1fr) 365px; } }
+    @media (max-width: 850px) {
+      header { padding: 10px 15px; } .brand span { display: none; } main { padding: 21px 15px 32px; }
+      .intro { grid-template-columns: 1fr; } .coverage { min-width: 0; } .map-layout { grid-template-columns: 1fr; }
+      .detail { position: static; max-height: none; } .roadmap { grid-template-columns: 1fr 1fr; } .road-phase:nth-child(2) { border-right: 0; }
+      .road-phase:nth-child(-n+2) { border-bottom: 1px solid var(--cp-border); }
+    }
+    @media (max-width: 560px) {
+      .header-actions .btn:not(.icon) { display: none; } h1 { font-size: 24px; } .commandbar { align-items: flex-start; flex-direction: column; }
+      .legend { flex-wrap: wrap; } .roadmap { grid-template-columns: 1fr; } .road-phase { border-right: 0; border-bottom: 1px solid var(--cp-border); }
+      .tradeoffs { grid-template-columns: 1fr; } .log-item { grid-template-columns: 1fr; gap: 4px; }
+    }
+    @media print {
+      header, .commandbar, .detail { display: none !important; } body { background: var(--cp-surface); } main { padding: 0; max-width: none; }
+      .view { display: none !important; } #roadmapView { display: block !important; } .roadmap-shell { border: 0; } .roadmap { display: grid; grid-template-columns: repeat(4, 1fr); }
+      .road-phase { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><div class="brand-mark">F</div><div><strong>Fabric Solution Decision Map</strong><span>Living architecture and roadmap</span></div></div>
+    <div class="header-actions"><button class="btn icon" id="resetBtn" title="Start over" aria-label="Start over">↻</button><button class="btn" id="starterBtn">Load greenfield starter</button><button class="btn primary" id="printBtn">Print roadmap</button></div>
+  </header>
+  <main>
+    <section class="intro">
+      <div><p class="eyebrow">Greenfield architecture workshop</p><h1>Make the decisions. Keep the reasoning. Evolve the solution.</h1><p>Start with a direction, compare credible patterns, and pivot without losing why the architecture changed. Every choice reshapes the roadmap and highlights decisions that need another look.</p></div>
+      <div class="coverage"><div class="coverage-copy"><span>Architecture coverage</span><strong id="coverageText">0 of 25 decided</strong></div><div class="track"><div class="fill" id="coverageFill"></div></div></div>
+    </section>
+    <nav class="commandbar">
+      <div class="tabs" role="tablist"><button class="tab active" data-view="map">Decision map</button><button class="tab" data-view="roadmap">Dynamic roadmap</button><button class="tab" data-view="log">Decision log</button></div>
+      <div class="legend"><span><i class="dot"></i>Open</span><span><i class="dot decided"></i>Decided</span><span><i class="dot review"></i>Review after pivot</span></div>
+    </nav>
+    <section class="view active" id="mapView">
+      <div class="map-layout"><div class="graph-shell"><div class="graph-title"><strong>Architecture dependency map</strong><span>Work left to right; upstream pivots reopen dependent choices</span></div><div class="graph" id="graph"></div></div><aside class="detail" id="detail" aria-live="polite"></aside></div>
+    </section>
+    <section class="view" id="roadmapView"><div class="roadmap-shell"><div class="view-head"><div><h2>Your evolving delivery roadmap</h2><p>Generated from the current architecture, not a fixed template.</p></div><button class="btn" onclick="window.print()">Print</button></div><div class="roadmap" id="roadmap"></div></div></section>
+    <section class="view" id="logView"><div class="log-shell"><div class="view-head"><div><h2>Architecture decision log</h2><p>A lightweight history of choices and pivots made in this browser.</p></div></div><div id="decisionLog"></div></div></section>
+  </main>
+  <script>
+    const DOCS = {
+      onelake: "https://learn.microsoft.com/fabric/onelake/onelake-overview",
+      shortcut: "https://learn.microsoft.com/fabric/onelake/onelake-shortcuts",
+      directlake: "https://learn.microsoft.com/fabric/fundamentals/direct-lake-overview",
+      warehouse: "https://learn.microsoft.com/fabric/data-warehouse/data-warehousing",
+      databricks: "https://learn.microsoft.com/azure/databricks/what-is-azure-databricks",
+      adls: "https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-introduction",
+      governance: "https://learn.microsoft.com/fabric/governance/governance-compliance-overview",
+      security: "https://learn.microsoft.com/fabric/security/security-overview",
+      lifecycle: "https://learn.microsoft.com/fabric/cicd/cicd-overview",
+      capacity: "https://learn.microsoft.com/fabric/enterprise/licenses"
+    };
+    const option = (id, name, summary, rationale, pros, cons, evidence, task) => ({ id, name, summary, rationale, pros, cons, evidence, task });
+    const DECISIONS = [
+      { id: "outcomes", stage: 0, icon: "◎", name: "Initial delivery strategy", desc: "Choose what the first funded release optimises for. This is a starting strategy, not a permanent split: product delivery should create reusable patterns, and platform investment should prove itself through real use.", deps: [], options: [
+        option("guided", "Product-first", "Deliver one named outcome end to end", "Start with a specific audience, decision, and measurable outcome. Build only the platform capabilities needed to deliver that product, then extract reusable patterns from evidence.", ["Value and feedback arrive early", "Scope and acceptance criteria stay concrete"], ["Early patterns may need refactoring", "Shared needs outside the first product can wait"], DOCS.governance, "Name the product owner and users; agree the outcome baseline, service levels, release scope, and reusable patterns to capture"),
+        option("platform", "Platform-first", "Establish shared foundations for several products", "Start with common security, governance, workspace, data product, and delivery guardrails because several committed teams need them. Pair the foundation with a lighthouse use case so it is tested by delivery.", ["Shared controls are designed once", "Supports multiple teams and domains"], ["Value can arrive later", "Risk of building abstractions before needs are proven"], DOCS.governance, "Confirm committed product teams; define minimum shared capabilities, owners, adoption measures, and a lighthouse product that validates the platform"),
+        option("dual", "Dual-track", "Build a thin platform through a lighthouse product", "Fund a small platform team and a product team together. The product creates demand and evidence while the platform team turns proven needs into reusable paved roads.", ["Balances early value and reuse", "Platform patterns are tested in real delivery"], ["Requires coordinated funding and ownership", "Can duplicate effort if team boundaries are unclear"], DOCS.governance, "Define the lighthouse outcome, minimum platform slice, team accountabilities, shared backlog, and decision points for expanding either track") ] },
+      { id: "sources", stage: 0, icon: "⌁", name: "Sources & connectivity", desc: "Inventory authoritative sources, change patterns, network paths, and ownership constraints.", deps: ["outcomes"], options: [
+        option("cloud", "Cloud and SaaS sources", "Managed connectors and public service paths", "Use when authoritative sources are cloud-accessible and approved managed connectors meet freshness needs.", ["Simpler connectivity", "Lower gateway operations"], ["API limits and connector behaviour vary", "Source extraction terms still apply"], "https://learn.microsoft.com/fabric/data-factory/pipeline-support", "Validate source APIs, connector support, throttling, incremental keys, and ownership"),
+        option("hybrid", "Hybrid and private sources", "Gateways and controlled network paths", "Use when on-premises or network-isolated systems remain authoritative.", ["Supports private estates", "Preserves source controls"], ["Gateway availability and sizing", "More network dependencies"], DOCS.security, "Prove gateway topology, throughput, DNS, firewall, identity, and failover"),
+        option("events", "Event and streaming sources", "Brokered events and continuous change", "Use when event time, ordering, replay, and seconds-level freshness are business requirements.", ["Low-latency insight", "Natural change propagation"], ["Requires event contracts", "Replay and late data add complexity"], "https://learn.microsoft.com/fabric/real-time-intelligence/event-streams/overview", "Define event contracts and prove ordering, replay, late arrival, throughput, and retention") ] },
+      { id: "boundary", stage: 0, icon: "◇", name: "Platform boundary", desc: "Decide whether Fabric owns the full analytical path or participates in an open Azure estate.", deps: ["outcomes", "sources"], options: [
+        option("fabric", "Fabric-first", "OneLake plus Fabric workloads", "Use when SaaS integration and a consolidated operating model matter more than specialised external engines.", ["Integrated experience", "Lower platform assembly effort"], ["Fabric capacity model", "Some specialised workloads may fit elsewhere"], DOCS.onelake, "Establish Fabric tenant, capacity, domains, and workspace boundaries"),
+        option("hybrid", "Fabric + Azure Databricks", "Shared lake data with specialised compute", "Use when Databricks engineering or ML capabilities are strategic while Fabric remains the BI and governance experience.", ["Best-fit engines", "Open Delta interoperability"], ["Two control planes", "Identity and cost need joint governance"], DOCS.databricks, "Define Fabric-Databricks ownership, identity, network, catalog, and cost boundaries"),
+        option("azure", "Open Azure data estate", "ADLS-led storage with selective Fabric use", "Use when independent storage lifecycle, multi-engine access, or existing Azure standards outweigh OneLake-first simplicity.", ["Engine-independent storage", "Independent lifecycle control"], ["More integration work", "Direct Lake path needs shortcuts or copies"], DOCS.adls, "Establish ADLS zones, access model, network controls, and Fabric integration") ] },
+      { id: "topology", stage: 0, icon: "▦", name: "Tenant, domain & workspace topology", desc: "Map legal, geographic, organisational, lifecycle, and workload boundaries to tenants, domains, workspaces, and capacities.", deps: ["outcomes", "boundary"], options: [
+        option("central-topology", "Centralised topology", "Shared tenant, domains, and platform workspaces", "Use when one operating model and a small number of teams can share governance and capacity boundaries.", ["Simpler administration", "Efficient resource pooling"], ["Larger blast radius", "Weak chargeback and isolation"], DOCS.governance, "Define shared tenant, domain, workspace, environment, naming, ownership, and capacity placement standards"),
+        option("domain-topology", "Domain-aligned topology", "Workspaces and ownership per data domain or product", "Use when business domains need accountable ownership and controlled autonomy within common tenant guardrails.", ["Ownership matches the business", "Supports federated delivery"], ["More workspaces and policies", "Cross-domain products need contracts"], DOCS.governance, "Map domains and products to workspaces, environments, capacities, owners, and cross-domain contracts"),
+        option("multi-boundary", "Multiple governed boundaries", "Separation by geography, regulation, subsidiary, or customer", "Use when isolation requirements cannot be represented safely by workspace roles alone.", ["Strong compliance isolation", "Independent administration and cost boundaries"], ["Cross-boundary sharing is harder", "Duplicated platform operations"], DOCS.security, "Document each legal and residency boundary; design tenant, region, domain, workspace, capacity, and B2B relationships") ] },
+      { id: "catalog", stage: 0, icon: "⌘", name: "Catalog & policy authority", desc: "Choose where metadata, lineage, discovery, entitlements, and data policy are authoritative across Fabric, Purview, and Databricks Unity Catalog.", deps: ["boundary", "topology"], options: [
+        option("fabric-catalog", "Fabric and Microsoft Purview", "Fabric-native governance with Purview estate visibility", "Use when Fabric is the primary experience and Microsoft governance services own enterprise discovery and policy.", ["Integrated Microsoft experience", "Natural fit for Fabric domains and endorsement"], ["Confirm control coverage per item", "External platforms need lineage integration"], DOCS.governance, "Define Purview and Fabric responsibilities for catalog, lineage, labels, endorsement, access workflow, and policy"),
+        option("unity", "Unity Catalog authoritative", "Databricks owns catalog and data entitlements", "Use when Databricks is the engineering and governance authority, with Fabric consuming governed Delta data through approved integration paths.", ["Unified Databricks data and AI governance", "Central privileges for Databricks workloads"], ["Fabric item permissions remain separate", "Cross-platform lineage and identity mapping need design"], "https://learn.microsoft.com/azure/databricks/data-governance/unity-catalog/", "Define Unity Catalog ownership, external locations, credentials, Fabric access path, principal mapping, lineage, and policy gaps"),
+        option("federated-catalog", "Federated catalog authorities", "Each platform governs what it owns under an enterprise contract", "Use when no single catalog can enforce every platform control and explicit authority boundaries are sustainable.", ["Best-fit native controls", "Supports heterogeneous estates"], ["Metadata reconciliation", "Policy conflicts and duplicate concepts"], DOCS.governance, "Create an authority matrix for metadata, lineage, classification, entitlements, quality, and conflict resolution") ] },
+      { id: "identity", stage: 0, icon: "◐", name: "Identity & access architecture", desc: "Design workforce, workload, guest, and privileged identities across Fabric, Databricks, ADLS, sources, and automation.", deps: ["boundary", "topology", "catalog"], options: [
+        option("managed", "Managed identity first", "Platform-managed workload identities where supported", "Use to reduce secret handling for platform-to-platform access while validating support for each Fabric and Databricks operation.", ["No rotating client secret", "Azure-native lifecycle"], ["Support varies by operation", "Cross-tenant use is constrained"], DOCS.security, "Map every workload hop to a managed identity, permission scope, owner, audit trail, and unsupported fallback"),
+        option("service-principals", "Product-scoped service principals", "App identity per product or automation boundary", "Use when explicit non-human identities are required across APIs, CI/CD, ADLS, Databricks, or tenants.", ["Clear automation identity", "Works across many Azure controls"], ["Credential and consent lifecycle", "Over-broad principals create blast radius"], DOCS.security, "Define app ownership, federation or credential storage, least privilege, rotation, consent, monitoring, and decommissioning"),
+        option("hybrid-identity", "Hybrid identity model", "Managed identities, service principals, groups, and B2B by purpose", "Use for enterprise estates where no single principal type covers workforce, workload, automation, and external access.", ["Best-fit identity per path", "Supports complex boundaries"], ["More governance and mapping", "Access reviews span platforms"], DOCS.security, "Create a principal matrix for users, groups, jobs, CI/CD, guests, privileged access, and cross-platform mapping") ] },
+      { id: "storage", stage: 1, icon: "▱", name: "Storage authority & layout", desc: "Choose the authoritative storage plane, open table contract, zone layout, and ownership of retention, deletion, and optimisation.", deps: ["boundary", "catalog", "identity"], options: [
+        option("onelake-authority", "OneLake authoritative", "Fabric owns governed Delta data and lifecycle", "Use when Fabric is the primary platform and OneLake should be the durable analytical system of record.", ["Native Fabric discovery and access", "Direct path to Fabric workloads"], ["External engines need supported access", "Capacity and tenant boundaries shape operation"], DOCS.onelake, "Design OneLake domains, workspaces, lakehouses, zones, table standards, retention, deletion, and optimisation ownership"),
+        option("adls-unity", "ADLS + Unity Catalog authoritative", "ADLS external locations governed through Unity Catalog", "Use when Databricks owns engineering and data governance while Fabric consumes approved Delta products.", ["Open storage and Databricks governance", "Multiple engines can consume curated data"], ["Fabric access and security translation", "Two platform control surfaces"], DOCS.adls, "Design accounts, containers, external locations, credentials, Delta ownership, Fabric shortcuts, retention, and delete propagation"),
+        option("split-storage", "Split authority by product", "Explicit OneLake and ADLS ownership boundaries", "Use when different products have legitimate platform authorities and no ambiguous dual-write contract exists.", ["Best-fit ownership by workload", "Avoids forced migration"], ["Cross-boundary lineage and sharing", "Duplicate standards and optimisation"], DOCS.shortcut, "Publish an authority matrix by dataset with copy, shortcut, write, retention, delete, optimisation, and conflict rules") ] },
+      { id: "landing", stage: 1, icon: "⇥", name: "Data landing", desc: "Choose where source data lands and whether it is copied, mirrored, or virtualised.", deps: ["sources", "storage", "identity"], options: [
+        option("onelake", "Copy into OneLake", "Fabric-managed landing zone", "Choose when Fabric is the primary data platform and local ownership simplifies downstream use.", ["Native Fabric path", "Simple lineage and access"], ["Creates another copy", "Movement and retention cost"], DOCS.onelake, "Create OneLake landing structure, ingestion controls, and retention policies"),
+        option("shortcuts", "OneLake shortcuts", "Reference ADLS or other storage", "Choose when data should remain in external storage but appear in OneLake without duplication.", ["Avoids copying", "Supports data virtualisation"], ["Source permissions still matter", "Feature compatibility must be validated"], DOCS.shortcut, "Prove shortcut access, permissions, performance, and failure behaviour"),
+        option("adls", "ADLS as system of record", "External lake remains authoritative", "Choose for multi-platform estates with established Azure storage governance.", ["Broad engine access", "Storage decoupled from compute"], ["More components to operate", "Fabric integration requires design"], DOCS.adls, "Build ADLS zones, lifecycle policy, private access, and OneLake exposure") ] },
+      { id: "resilience", stage: 1, icon: "⊕", name: "Residency, resilience & recovery", desc: "Place data and compute by geography and criticality, then define realistic recovery for every platform dependency.", deps: ["topology", "storage", "identity"], options: [
+        option("single-region", "Single-region with recovery", "One primary region with tested restore and rebuild", "Use when residency permits one region and business service levels can be met by restore, redeploy, or source replay.", ["Lower cost and complexity", "Clear primary operating model"], ["Regional outage exposure", "Recovery may involve manual orchestration"], "https://learn.microsoft.com/fabric/security/security-fundamentals", "Classify workloads by RPO/RTO; test metadata export, redeployment, data restore or replay, and identity recovery"),
+        option("tiered-geo", "Tiered geo strategy", "Recovery pattern varies by product criticality", "Use when only selected products justify duplicated data, standby components, or accelerated recovery.", ["Investment follows criticality", "Avoids blanket duplication"], ["Multiple runbooks", "Dependencies can have unequal recovery capability"], DOCS.security, "Map every product dependency to region, residency, RPO/RTO, recovery method, owner, and test schedule"),
+        option("multiple-regions", "Multiple regional estates", "Independent deployments aligned to residency boundaries", "Use when data must remain in specific geographies or regional autonomy is required.", ["Strong residency alignment", "Regional fault isolation"], ["Duplicated operations", "Global products and metadata need reconciliation"], DOCS.security, "Design regional tenants or capacities, data placement, global metadata, identity, deployment, sharing, failover, and cost") ] },
+      { id: "ingestion", stage: 1, icon: "↦", name: "Ingestion & change", desc: "Select batch, CDC, mirroring, and streaming patterns with replay and recovery semantics.", deps: ["landing"], options: [
+        option("fabric-pipelines", "Fabric pipelines", "Managed batch and orchestration", "A pragmatic default for scheduled movement and orchestration inside Fabric.", ["Integrated monitoring", "Broad connector model"], ["Gateway may be required", "Complex CDC may need another pattern"], "https://learn.microsoft.com/fabric/data-factory/data-factory-overview", "Build incremental pipelines with retries, quarantine, and observability"),
+        option("databricks-loader", "Databricks ingestion", "Auto Loader and streaming pipelines", "Choose when Databricks owns high-scale file or streaming ingestion and transformation.", ["Scalable incremental ingestion", "Unified with Databricks engineering"], ["Additional platform operations", "Cross-platform lineage requires care"], DOCS.databricks, "Implement Databricks ingestion, checkpoints, schema evolution, and Fabric handoff"),
+        option("realtime", "Fabric Real-Time Intelligence", "Eventstream and Eventhouse path", "Choose when seconds-level analytics or action is a genuine requirement.", ["Low-latency path", "Integrated event-to-insight tooling"], ["Separate hot-data design", "Requires event semantics and replay planning"], "https://learn.microsoft.com/fabric/real-time-intelligence/overview", "Prove event ingestion, late arrival, replay, hot retention, and activation") ] },
+      { id: "compute", stage: 1, icon: "⌘", name: "Storage & compute", desc: "Select the main engineering and serving engines while preserving an open data contract.", deps: ["landing", "ingestion"], options: [
+        option("lakehouse", "Fabric Lakehouse", "Delta tables with Spark and SQL access", "Use for an open-table medallion design with Fabric-native engineering.", ["Open Delta format", "OneLake and Fabric integration"], ["SQL endpoint has defined scope", "Spark skills may be needed"], DOCS.onelake, "Create medallion Lakehouse, table standards, quality gates, and compaction"),
+        option("warehouse", "Fabric Warehouse", "SQL-first analytical store", "Use when relational modelling, T-SQL development, and warehouse serving dominate.", ["Familiar SQL experience", "Managed analytical warehouse"], ["Less natural for unstructured data", "Engineering patterns differ from lakehouse"], DOCS.warehouse, "Define Warehouse schemas, loading patterns, constraints, and workload tests"),
+        option("databricks", "Azure Databricks", "Databricks engineering over Delta", "Use for specialised engineering, streaming, or ML while exposing curated data to Fabric.", ["Mature engineering ecosystem", "Strong multi-language workloads"], ["Separate compute and governance surface", "Cross-platform access must be designed"], DOCS.databricks, "Build Databricks medallion products and validate Fabric consumption path") ] },
+      { id: "design", stage: 1, icon: "▦", name: "Data design & quality", desc: "Define product boundaries, modelling conventions, contracts, quality controls, and history.", deps: ["landing", "compute"], options: [
+        option("medallion", "Medallion data products", "Layered Delta products by domain", "Use when progressive refinement, reusable data products, and open tables suit the engineering model.", ["Clear quality boundaries", "Reusable domain products"], ["Can create unnecessary layers", "Ownership must be explicit"], "https://learn.microsoft.com/fabric/onelake/onelake-medallion-lakehouse-architecture", "Define product contracts, layer responsibilities, quality rules, history, and acceptance tests"),
+        option("dimensional", "Dimensional warehouse", "Facts, dimensions, and governed marts", "Use when stable business processes and analytical consumption favour a dimensional contract.", ["Business-friendly model", "Efficient analytical serving"], ["Upfront modelling effort", "Source changes require managed evolution"], DOCS.warehouse, "Model grains, conformed dimensions, history, reconciliation, and data quality thresholds"),
+        option("virtual", "Virtualised access", "Minimal transformation over governed source data", "Use selectively when copying is constrained and source semantics are already fit for consumption.", ["Less duplication", "Fast initial access"], ["Source coupling", "Quality and performance remain upstream concerns"], DOCS.shortcut, "Prove source contracts, query performance, availability, schema change, and consumer isolation") ] },
+      { id: "semantic", stage: 2, icon: "▤", name: "Semantic & BI mode", desc: "Choose how Power BI semantic models reach curated data and meet freshness and scale needs.", deps: ["compute", "design"], options: [
+        option("directlake", "Direct Lake", "Semantic model over OneLake data", "Use when curated Delta data is accessible in OneLake and interactive performance without import copies is valuable.", ["Avoids full import copies", "Tight Fabric integration"], ["Guardrails and fallback behaviour need testing", "Model and source design still matter"], DOCS.directlake, "Build Direct Lake semantic model; test framing, fallback, security, and concurrency"),
+        option("import", "Import mode", "Data loaded into the semantic model", "Use for predictable in-memory performance when scheduled refresh and duplication are acceptable.", ["Mature and predictable", "Broad modelling compatibility"], ["Refresh latency", "Duplicates data in the model"], "https://learn.microsoft.com/power-bi/connect-data/refresh-data", "Design incremental refresh, model partitions, and peak concurrency tests"),
+        option("directquery", "DirectQuery or composite", "Queries delegated to serving engine", "Use when data cannot be imported or mixed storage modes are required, after testing source concurrency.", ["Source remains authoritative", "Supports mixed models"], ["Source performance dependency", "More tuning complexity"], "https://learn.microsoft.com/power-bi/connect-data/desktop-directquery-about", "Prototype query paths, aggregations, source concurrency, and user latency") ] },
+      { id: "reporting", stage: 2, icon: "▥", name: "Reporting & self-service", desc: "Define the reporting portfolio, semantic reuse, ownership, certification, and boundaries for governed self-service.", deps: ["semantic", "governance", "identity"], options: [
+        option("managed-reporting", "Centrally managed BI", "Certified models and reports for governed consumption", "Use where consistency, regulated metrics, or limited authoring capability outweigh broad autonomy.", ["Consistent definitions", "Controlled release and support"], ["Central team can bottleneck", "Local questions wait for prioritisation"], "https://learn.microsoft.com/power-bi/guidance/fabric-adoption-roadmap-content-ownership-and-management", "Define certified models, report ownership, release process, audience access, support, usage metrics, and retirement"),
+        option("governed-self-service", "Governed self-service", "Shared semantic foundations with domain extensions", "Use when business teams need authoring autonomy inside certified data, security, endorsement, and lifecycle guardrails.", ["Faster local insight", "Reuses governed semantics"], ["Model sprawl risk", "Requires enablement and monitoring"], "https://learn.microsoft.com/power-bi/guidance/fabric-adoption-roadmap-content-ownership-and-management", "Define reusable semantic models, build permissions, endorsement, extension rules, sandboxes, promotion, and sprawl monitoring"),
+        option("mixed-consumption", "Mixed reporting portfolio", "Enterprise BI, paginated, embedded, and operational needs", "Use when distinct audiences require managed dashboards, pixel-perfect outputs, embedded analytics, or near-real-time operational views.", ["Fits each consumption need", "Separates audience service levels"], ["More delivery patterns", "Licensing, identity, and capacity vary"], "https://learn.microsoft.com/power-bi/guidance/fabric-adoption-roadmap-content-delivery-scope", "Segment audiences and choose semantic reuse, report mode, embedding identity, distribution, accessibility, licensing, and service levels") ] },
+      { id: "sharing", stage: 2, icon: "⇱", name: "Data sharing & external access", desc: "Choose how internal domains, partners, subsidiaries, and applications consume data without losing ownership or policy.", deps: ["catalog", "identity", "storage", "semantic"], options: [
+        option("internal-sharing", "Internal governed reuse", "Cross-workspace products and semantic models", "Use when consumers remain inside the tenant but ownership spans domains and workspaces.", ["Keeps data inside tenant controls", "Supports product reuse"], ["Permission chains can become opaque", "Breaking changes need contracts"], DOCS.governance, "Define product discovery, request and approval, cross-workspace access, contracts, versioning, usage telemetry, and revocation"),
+        option("partner-data", "Partner data sharing", "Shortcuts, shares, files, or APIs for organisations", "Use when external organisations need governed data products rather than interactive report access alone.", ["Avoids ad hoc extracts", "Can preserve producer ownership"], ["Cross-tenant identity and support", "Capabilities differ by sharing method"], DOCS.shortcut, "Choose sharing mechanism; prove guest or recipient identity, terms, data minimisation, revocation, lineage, egress, and SLA"),
+        option("embedded-external", "External and embedded analytics", "Reports or APIs delivered inside customer experiences", "Use when external users consume governed insights through an application or managed audience experience.", ["Integrated customer experience", "Central semantic governance"], ["Embedding identity and licensing complexity", "Tenant isolation must be explicit"], "https://learn.microsoft.com/power-bi/developer/embedded/embedded-analytics-power-bi", "Design tenant isolation, embedding identity, authorization, capacity, licensing, audit, support, and data export controls") ] },
+      { id: "ai", stage: 2, icon: "✧", name: "AI & advanced analytics", desc: "Decide whether the solution needs experimentation, ML, generative AI, or feature operations.", deps: ["compute", "design"], options: [
+        option("none", "Analytics first", "Defer AI until governed data products exist", "Use when no validated AI outcome exists yet; preserve future access without inventing an AI workstream.", ["Focuses first release", "Avoids speculative complexity"], ["AI value arrives later", "Future requirements still need monitoring"], "https://learn.microsoft.com/fabric/data-science/data-science-overview", "Document deferred AI hypotheses and keep data contracts suitable for later experimentation"),
+        option("fabric-ai", "Fabric data science", "Notebooks, experiments, and models in Fabric", "Use when the team wants an integrated Fabric data, experimentation, and reporting experience.", ["Integrated with OneLake", "Single SaaS experience"], ["MLOps depth must be validated", "Specialised requirements may need Azure services"], "https://learn.microsoft.com/fabric/data-science/data-science-overview", "Prove feature preparation, experiment tracking, evaluation, deployment, monitoring, and responsible AI"),
+        option("databricks-ai", "Databricks ML and AI", "Advanced ML lifecycle in Azure Databricks", "Use when Databricks is the strategic engineering and ML platform or specialised ML operations are required.", ["Mature ML tooling", "Unified with Databricks engineering"], ["Cross-platform serving design", "Additional skills and cost surface"], DOCS.databricks, "Prove governed feature access, model lifecycle, serving, Fabric consumption, and responsible AI") ] },
+      { id: "governance", stage: 2, icon: "⌖", name: "Governance & ownership", desc: "Map domains, data products, catalog metadata, quality, endorsement, and accountable owners.", deps: ["boundary", "design"], options: [
+        option("central", "Central platform ownership", "One team governs and delivers", "Fits smaller estates or early phases where consistency and speed outweigh federation.", ["Clear accountability", "Consistent standards"], ["Can become a bottleneck", "Domain context is indirect"], DOCS.governance, "Assign platform owner, product owners, certification, quality, and exception process"),
+        option("federated", "Federated domains", "Domains own products within guardrails", "Fits scaled organisations with capable domain teams and an explicit platform operating model.", ["Ownership near the business", "Scales delivery"], ["Requires strong guardrails", "Capability varies by domain"], DOCS.governance, "Define domains, product contracts, platform guardrails, and federated review"),
+        option("hybrid-governance", "Central guardrails + domain ownership", "Platform controls the paved road; domains own products", "Use when a central team must govern tenant, identity, capacity, and standards while domain teams own data meaning, quality, access decisions, and service outcomes.", ["Separates platform and product accountability", "Supports gradual federation"], ["Decision rights must be explicit", "Shared responsibilities can create gaps"], DOCS.governance, "Publish a responsibility matrix for platform controls, domain products, access, quality, incidents, exceptions, and architecture review") ] },
+      { id: "security", stage: 2, icon: "▣", name: "Security & network", desc: "Translate identity, sensitivity, residency, and connectivity requirements into controls.", deps: ["boundary", "landing"], options: [
+        option("saas", "SaaS-native controls", "Tenant, workspace, item, and data security", "Use when public service connectivity is acceptable and Fabric-native controls meet policy.", ["Simpler operations", "Integrated identity model"], ["Tenant governance is critical", "Validate each workload control"], DOCS.security, "Implement tenant settings, workspace roles, item access, RLS/OLS, and audit"),
+        option("private", "Private connectivity", "Managed private endpoints and restricted access", "Use where policy requires controlled network paths, after validating each source and Fabric workload.", ["Stronger network isolation", "Policy alignment"], ["Higher setup complexity", "Feature and regional support must be checked"], DOCS.security, "Prove private paths, DNS, gateways, identities, and break-glass operations") ] },
+      { id: "delivery", stage: 2, icon: "⇄", name: "Delivery lifecycle", desc: "Define workspaces, Git, deployment, configuration, testing, and release responsibilities.", deps: ["boundary", "governance"], options: [
+        option("simple", "Dev / test / prod", "Managed deployment pipeline", "A strong default for a focused product with controlled releases.", ["Clear promotion path", "Low process overhead"], ["Item support varies", "Configuration still needs design"], DOCS.lifecycle, "Create environment workspaces, deployment rules, tests, approvals, and rollback"),
+        option("scaled", "Git-led platform delivery", "Source-controlled multi-team lifecycle", "Use where multiple teams require branching, automation, and repeatable workspace provisioning.", ["Auditability and automation", "Scales team contribution"], ["More engineering investment", "Fabric item support must be validated"], DOCS.lifecycle, "Build repository model, CI checks, workspace automation, and release orchestration") ] },
+      { id: "automation", stage: 2, icon: "⚙", name: "Automation, testing & configuration", desc: "Decide how infrastructure, Fabric items, Databricks assets, secrets, configuration, quality gates, and drift are managed as code.", deps: ["identity", "design", "delivery"], options: [
+        option("native-automation", "Native Git and deployment automation", "Use Fabric and Databricks native lifecycle features", "Use when supported native definitions and deployment features cover the estate and a lower engineering burden is preferred.", ["Lower automation overhead", "Close to product lifecycle"], ["Coverage differs by item", "Tenant and Azure resources still need another path"], DOCS.lifecycle, "Inventory item support; automate source control, parameterisation, promotion, tests, approvals, rollback, and unsupported-item handling"),
+        option("iac-platform", "IaC-led platform automation", "Bicep or Terraform plus APIs and CI/CD", "Use when repeatable tenant, Azure, workspace, capacity, Databricks, security, and policy configuration is required.", ["Repeatability and auditability", "Cross-platform provisioning"], ["Provider and API coverage evolves", "Requires platform engineering"], DOCS.lifecycle, "Define desired-state boundaries, federated deployment identities, state, secrets, policy tests, drift detection, and recovery"),
+        option("hybrid-automation", "Hybrid automation", "IaC for foundations; native Git and APIs for workload items", "Use for most enterprise estates where infrastructure and analytical artifacts have different deployment lifecycles.", ["Best-fit tool per layer", "Supports gradual automation"], ["Multiple pipelines and ownership boundaries", "End-to-end rollback is harder"], DOCS.lifecycle, "Publish an automation matrix by asset with repository, owner, pipeline, tests, configuration, secret source, promotion, and rollback") ] },
+      { id: "capacity", stage: 3, icon: "▥", name: "Capacity topology & SKU", desc: "Choose capacity region, SKU, isolation tiers, assignment rules, scale triggers, and administration from measured workload shape.", deps: ["topology", "ingestion", "compute", "semantic", "ai", "reporting"], options: [
+        option("shared", "Shared capacity pool", "Consolidated capacity with workload guardrails", "Start here when products can share region and service levels and usage will be actively monitored.", ["Efficient pooling and smoothing", "Simple initial administration"], ["Noisy-neighbour risk", "Chargeback is approximate without telemetry"], DOCS.capacity, "Run representative background and interactive concurrency tests; select initial SKU, assignments, limits, and scale triggers"),
+        option("tiered-capacity", "Tiered capacity topology", "Shared pool plus isolated critical or regional capacities", "Use when most workloads can pool but critical, regulated, or geographically distinct products need isolation.", ["Balances pooling and isolation", "Supports differentiated service levels"], ["More placement rules", "Cross-capacity dependencies need monitoring"], DOCS.capacity, "Classify products by region and criticality; define workspace placement, reservation, scale, reassignment, and administration"),
+        option("domain-capacity", "Domain-owned capacities", "Capacity and budget delegated to domains", "Use when mature domains require operational and financial autonomy under enterprise guardrails.", ["Clear accountability", "Independent scaling and chargeback"], ["Lower pooling efficiency", "Requires capable domain administrators"], DOCS.capacity, "Define delegated administration, permitted SKUs, budgets, monitoring, support, reservation, and central intervention rules") ] },
+      { id: "observability", stage: 3, icon: "◉", name: "Observability & quality telemetry", desc: "Unify technical health, freshness, data quality, lineage, security, capacity, and user-experience signals across platforms.", deps: ["design", "delivery", "capacity"], options: [
+        option("fabric-monitoring", "Fabric-native monitoring", "Fabric hubs and capacity telemetry for a focused estate", "Use when Fabric owns most workloads and native monitoring covers the agreed operational signals.", ["Low integration effort", "Close to Fabric operations"], ["Cross-platform view is limited", "Long-term and custom telemetry may need export"], "https://learn.microsoft.com/fabric/admin/monitoring-hub", "Define SLIs and alerts for runs, freshness, quality, semantic refresh, query experience, capacity, security, and cost"),
+        option("azure-observability", "Central Azure observability", "Azure Monitor or enterprise platform aggregates telemetry", "Use when Fabric, Databricks, ADLS, networks, and applications require one operational view and retention model.", ["Cross-platform correlation", "Enterprise alert and retention integration"], ["Telemetry engineering effort", "Not every signal exports identically"], "https://learn.microsoft.com/azure/azure-monitor/fundamentals/overview", "Design export, correlation IDs, dashboards, retention, alerts, runbooks, service ownership, and access to telemetry"),
+        option("federated-observability", "Federated product telemetry", "Common standards with product-owned dashboards and alerts", "Use when domains operate products but central teams require comparable service, quality, and cost signals.", ["Ownership near the product", "Scales across domains"], ["Consistency requires enforcement", "Central incident view needs aggregation"], DOCS.governance, "Publish mandatory SLIs, schemas, alert severities, ownership tags, central rollups, and product runbook standards") ] },
+      { id: "finops", stage: 3, icon: "¤", name: "FinOps & cost allocation", desc: "Make Fabric capacity, Databricks compute, storage, network, licensing, and support costs visible to accountable owners.", deps: ["boundary", "topology", "capacity", "observability"], options: [
+        option("showback", "Central budget with showback", "Platform pays and reports attributable usage", "Use early when shared investment is appropriate but teams need visibility before chargeback.", ["Encourages cost awareness", "Avoids premature billing mechanics"], ["Weak enforcement", "Shared costs need allocation rules"], DOCS.capacity, "Define cost taxonomy, workspace and job ownership tags, allocation rules, budgets, anomaly alerts, and monthly showback"),
+        option("chargeback", "Product or domain chargeback", "Costs assigned to accountable business owners", "Use when domains control demand and can act on capacity, Databricks, storage, and licensing costs.", ["Strong accountability", "Supports investment decisions"], ["Allocation disputes", "Shared and smoothed capacity complicate attribution"], DOCS.capacity, "Agree fixed and variable allocation, shared-cost treatment, budgets, reservations, unit economics, and dispute process"),
+        option("hybrid-finops", "Base allocation plus usage", "Shared foundation funded centrally; incremental demand allocated", "Use when enterprise foundations benefit everyone but exceptional scale should be funded by consumers.", ["Balances shared investment and accountability", "Works with pooled capacity"], ["Needs agreed baselines", "Cross-platform units differ"], DOCS.capacity, "Set funded baseline, usage measures, overage rules, Databricks and storage mapping, optimization cadence, and forecast ownership") ] },
+      { id: "operations", stage: 3, icon: "◉", name: "Operations & reliability", desc: "Make freshness, failures, capacity, cost, recovery, and ownership visible and actionable.", deps: ["ingestion", "delivery", "capacity", "observability", "resilience"], options: [
+        option("product-sre", "Data product operations", "Product teams own service health", "Use when domain or product teams can own end-to-end health against explicit service levels.", ["Fast issue ownership", "Aligns run with build"], ["Requires operational maturity", "Cross-product standards still needed"], "https://learn.microsoft.com/fabric/admin/monitoring-hub", "Implement health signals, alerts, runbooks, ownership, incident flow, RPO and RTO tests"),
+        option("central-ops", "Central platform operations", "Shared monitoring and support", "Use when a central team operates the platform and coordinates product-level remediation.", ["Consistent operations", "Concentrated expertise"], ["Can distance owners from impact", "Handoffs need precision"], "https://learn.microsoft.com/fabric/admin/monitoring-hub", "Create central dashboards, support model, escalation, runbooks, and service reviews") ] },
+      { id: "adoption", stage: 3, icon: "✦", name: "Adoption & evolution", desc: "Plan enablement, architecture review, technical debt, and evidence-led pivots after launch.", deps: ["outcomes", "governance", "operations"], options: [
+        option("product", "Product-led evolution", "Roadmap driven by user outcomes and telemetry", "Use to keep architecture decisions tied to measured value rather than platform fashion.", ["Evidence-led investment", "Clear prioritisation"], ["Requires usage telemetry", "Stakeholder discipline needed"], DOCS.governance, "Baseline adoption, outcome KPIs, architecture reviews, and quarterly pivot checkpoints"),
+        option("enablement", "Platform enablement", "Patterns, coaching, and community", "Use when broad self-service adoption is part of the target operating model.", ["Builds internal capability", "Scales beyond one team"], ["Needs sustained investment", "Guardrails must evolve"], DOCS.governance, "Launch pattern library, office hours, training, feedback, and maturity reviews") ] }
+    ];
+    const GUIDANCE = {
+      outcomes: { ask: ["Is there one funded outcome with a named owner and users, or several committed product teams needing the same foundation?", "Which capabilities are truly shared now, and which are only predicted future needs?", "Can a lighthouse product and a small platform team be funded and governed together?"], validate: "Name the funded products and owners, baseline the first business outcome, identify the minimum shared capabilities, and agree when evidence would justify expanding or changing the strategy." },
+      sources: { ask: ["Which systems are authoritative and who owns access?", "How do volume, change rate, schema drift, and extraction limits behave?", "Which sources require gateways, private paths, or event contracts?"], validate: "Test representative connectivity, incremental extraction, throttling, throughput, schema change, and failure recovery." },
+      boundary: { ask: ["Which platforms and skills are already strategic?", "Must storage or compute remain independently usable outside Fabric?", "Which operating complexity and lock-in are acceptable?"], validate: "Run one representative path end to end and confirm ownership, identity, networking, lineage, cost, and exit strategy." },
+      topology: { ask: ["Which legal, geographic, subsidiary, customer, and environment boundaries require isolation?", "Where should ownership, administration, cost, and blast radius be separated?", "Can cross-domain needs use contracts and sharing, or do they require shared workspaces?"], validate: "Map representative products to tenant, region, domain, workspace, environment, and capacity; test cross-boundary identity, sharing, deployment, support, and cost." },
+      catalog: { ask: ["Which system is authoritative for catalog metadata, lineage, classification, quality, and data entitlements?", "If Unity Catalog governs ADLS data, which controls remain in Fabric for shortcuts, semantic models, and reports?", "How are conflicts, duplicates, and missing cross-platform lineage resolved?"], validate: "Trace one sensitive product from source through Databricks or Fabric to a report; verify ownership, metadata, lineage, policy enforcement, access review, and revocation in every system." },
+      identity: { ask: ["Which workforce, workload, automation, guest, and privileged identities cross each platform boundary?", "Where can managed identity or workload federation replace stored credentials?", "Who owns principal creation, consent, least privilege, reviews, rotation, and retirement?"], validate: "Create a principal matrix and test one end-to-end path for least privilege, token acquisition, audit, credential failure, access review, revocation, and break-glass operation." },
+      storage: { ask: ["Is OneLake, ADLS, or a product-specific plane authoritative for each dataset?", "Who may write, optimise, retain, archive, and delete each Delta table or file set?", "How will Unity Catalog locations and Fabric shortcuts preserve security and avoid ambiguous dual writes?"], validate: "Publish a dataset authority matrix and prove write ownership, Delta compatibility, shortcut access, delete propagation, retention, optimisation, lineage, and recovery." },
+      landing: { ask: ["Where must the authoritative copy live?", "Can data be duplicated, and who owns retention and deletion?", "Which engines need concurrent access to the same data?"], validate: "Prove access, performance, security propagation, lineage, lifecycle, deletion, and failure behaviour with production-shaped data." },
+      resilience: { ask: ["Which datasets have residency constraints and which products have distinct RPO/RTO tiers?", "What happens when a region, capacity, workspace, storage account, identity, or source is unavailable?", "Which recovery steps are native, redeployed, restored, replayed, or manually coordinated?"], validate: "Document dependency-level recovery and run a tabletop plus technical recovery exercise for a critical product, including identity, metadata, data, code, connections, and consumer communication." },
+      ingestion: { ask: ["What latency is tied to a real business action?", "Are incremental keys, CDC, or replay available?", "How will duplicates, late data, schema drift, and poison records be handled?"], validate: "Exercise initial load, incremental change, retry, replay, idempotency, quarantine, and operational alerting." },
+      compute: { ask: ["Are engineering skills primarily SQL, Spark, or Databricks?", "What data shapes and transformations dominate?", "Which serving engines and open-data requirements must be supported?"], validate: "Benchmark representative transformations and concurrency; verify table compatibility, maintainability, security, and cost." },
+      design: { ask: ["What is the grain and owner of each data product?", "Which history, reconciliation, and quality rules are mandatory?", "Where should business semantics be resolved?"], validate: "Agree contracts and acceptance thresholds, then reconcile a representative product to its authoritative source." },
+      semantic: { ask: ["What model size, freshness, and user concurrency are expected?", "Which security rules and calculation complexity apply?", "Can the serving source sustain interactive queries?"], validate: "Test model refresh or framing, security, fallback behaviour, peak concurrency, query latency, and change management." },
+      reporting: { ask: ["Which audiences need governed reports, self-service exploration, paginated output, embedded analytics, or operational views?", "Which metrics and semantic models should be reused, certified, extended, or isolated?", "Who can build, publish, certify, support, export, and retire content?"], validate: "Test representative audience journeys, semantic reuse, security, accessibility, peak concurrency, distribution, embedding, usage monitoring, support, and retirement." },
+      sharing: { ask: ["Are consumers in the same workspace, domain, tenant, external organisation, or customer-facing application?", "Should they receive data, a semantic contract, a report, or an API?", "How are purpose, minimisation, versioning, egress, revocation, and service levels governed?"], validate: "Prove one sharing path end to end with recipient identity, authorization, data contract, audit, revocation, breaking change, cost, and support ownership." },
+      ai: { ask: ["Which decision or workflow will AI improve measurably?", "Is the need experimentation, prediction, generative AI, or real-time scoring?", "What data rights, evaluation, explainability, and human oversight apply?"], validate: "Define a baseline and acceptance metrics; prove governed data access, evaluation, deployment, monitoring, and responsible AI controls." },
+      governance: { ask: ["Who owns each domain, product, definition, and quality issue?", "Which assets require cataloguing, endorsement, labels, or lineage?", "How will policy exceptions and cross-domain contracts be resolved?"], validate: "Assign accountable owners and walk one product through discovery, access request, lineage, quality incident, and policy exception." },
+      security: { ask: ["Which identities access sources, data, and reports?", "What residency, sensitivity, private connectivity, and separation rules apply?", "Where are row, object, item, workspace, and tenant controls enforced?"], validate: "Complete threat and access reviews; test least privilege, data exfiltration controls, audit, private paths, and break-glass access." },
+      delivery: { ask: ["How many teams and environments will deliver changes?", "Which artifacts require source control, parameterisation, and automated tests?", "Who approves, deploys, rolls back, and resolves drift?"], validate: "Promote a representative change through every environment, including tests, secrets, approvals, rollback, and audit evidence." },
+      automation: { ask: ["Which tenant, Azure, Fabric, Databricks, and data assets can be represented and deployed as code?", "Where do configuration and secrets live for each environment?", "Which schema, data quality, security, performance, and regression tests block promotion?"], validate: "Rebuild a representative environment from source, promote a breaking and non-breaking change, detect drift, rotate a secret, fail a quality gate, and execute rollback." },
+      capacity: { ask: ["What are the peak interactive and background workload shapes?", "Which workloads require isolation, geography, or chargeback?", "What budget, scale triggers, and utilisation guardrails apply?"], validate: "Run representative concurrent workloads, inspect capacity telemetry, model cost ranges, and agree scale and isolation triggers." },
+      observability: { ask: ["Which signals demonstrate freshness, quality, reliability, security, user experience, capacity, and cost?", "Which platform owns each signal, alert, dashboard, retention period, and runbook?", "How will Fabric, Databricks, ADLS, network, and application events be correlated?"], validate: "Inject representative failures and quality breaches; verify telemetry arrival, correlation, alert routing, ownership, runbook action, retention, and service-level reporting." },
+      finops: { ask: ["Who funds shared foundations and who controls incremental demand?", "How are Fabric capacity, Databricks compute, ADLS, network, licensing, and support attributed together?", "Which budgets, unit metrics, reservation choices, anomaly thresholds, and optimization actions are accountable?"], validate: "Reconcile platform invoices and telemetry to products or domains, publish showback for a full cycle, test anomaly alerts, and agree allocation and optimization decisions with owners." },
+      operations: { ask: ["Who owns freshness, failure, performance, and cost incidents?", "Which RPO, RTO, support hours, and escalation paths apply?", "What signals prove the service is healthy from a user perspective?"], validate: "Run failure, recovery, alert, escalation, and restore exercises against agreed service levels and named owners." },
+      adoption: { ask: ["Which users and teams must change how they work?", "How will adoption and business outcomes be measured?", "When will architecture choices and technical debt be reviewed?"], validate: "Baseline usage and outcomes, assign enablement owners, and schedule evidence-led product and architecture reviews." }
+    };
+    const STAGES = [{ name: "Frame", phase: "Weeks 0-2" }, { name: "Foundation", phase: "Weeks 2-6" }, { name: "Deliver", phase: "Weeks 6-12" }, { name: "Prove & evolve", phase: "Ongoing" }];
+    const STORAGE_KEY = "fabric-solution-map-v1";
+    let state = loadState();
+    let selectedId = state.selectedId || "boundary";
+
+    function loadState() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { decisions: {}, history: [] }; } catch { return { decisions: {}, history: [] }; } }
+    function save() { state.selectedId = selectedId; localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); updateCoverage(); }
+    function escapeHtml(value) { return String(value || "").replace(/[&<>'"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[c])); }
+    function current(id) { return state.decisions[id] || { optionId: null, status: "open", notes: "" }; }
+    function selectedOption(decision) { const value = current(decision.id); return decision.options.find(item => item.id === value.optionId); }
+    function dependentsOf(id) { return DECISIONS.filter(decision => decision.deps.includes(id)); }
+    function renderGraph() {
+      document.getElementById("graph").innerHTML = STAGES.map((stage, index) => `<section class="stage"><div class="stage-head"><div class="stage-number">${index + 1}</div><strong>${stage.name}</strong></div><div class="nodes">${DECISIONS.filter(decision => decision.stage === index).map(decision => {
+        const value = current(decision.id); const choice = selectedOption(decision);
+        return `<button class="node ${decision.id === selectedId ? "selected" : ""}" data-id="${decision.id}" data-status="${value.status}" aria-pressed="${decision.id === selectedId}"><span class="node-top"><span class="node-icon">${decision.icon}</span><span class="status" title="${value.status}"></span></span><h3>${decision.name}</h3><div class="node-choice">${choice ? escapeHtml(choice.name) : "Choose an architecture direction"}</div><div class="node-deps">${decision.deps.length ? `Depends on ${decision.deps.length} earlier decision${decision.deps.length > 1 ? "s" : ""}` : "Starting point"}</div></button>`;
+      }).join("")}</div></section>`).join("");
+      document.querySelectorAll(".node").forEach(node => node.addEventListener("click", () => { selectedId = node.dataset.id; save(); renderAll(); if (innerWidth <= 850) document.getElementById("detail").scrollIntoView({ behavior: "smooth" }); }));
+    }
+    function renderDetail() {
+      const decision = DECISIONS.find(item => item.id === selectedId); const value = current(decision.id); const choice = selectedOption(decision);
+      const guide = GUIDANCE[decision.id];
+      document.getElementById("detail").innerHTML = `<div class="detail-head"><div class="detail-kicker">Decision ${DECISIONS.indexOf(decision) + 1} of ${DECISIONS.length}</div><h2>${decision.icon} ${decision.name}</h2><p class="detail-desc">${decision.desc}</p></div><div class="detail-body"><p class="section-label">Ask before choosing</p><div class="guide"><ul>${guide.ask.map(question => `<li>${question}</li>`).join("")}</ul><div class="validation"><strong>Evidence gate:</strong> ${guide.validate}</div></div><p class="section-label">Compare viable directions</p><div class="options">${decision.options.map(item => `<button class="option ${item.id === value.optionId ? "selected" : ""}" data-option="${item.id}"><strong>${item.name}</strong><span>${item.summary}</span></button>`).join("")}</div>${choice ? renderEvidence(choice) : `<div class="impact">Select a direction to reveal the evidence, trade-offs, and roadmap impact. A decision here is a starting hypothesis, not a permanent lock-in.</div>`}<div class="field"><label for="decisionNotes">Context and rationale</label><textarea id="decisionNotes" placeholder="Record answers, constraints, assumptions, owner, evidence still needed, and why this choice fits…">${escapeHtml(value.notes)}</textarea></div>${dependentsOf(decision.id).length ? `<div class="impact">Changing this choice will flag for review: ${dependentsOf(decision.id).map(item => item.name).join(", ")}.</div>` : ""}</div>`;
+      document.querySelectorAll(".option").forEach(button => button.addEventListener("click", () => chooseOption(decision.id, button.dataset.option)));
+      document.getElementById("decisionNotes").addEventListener("input", event => { const record = current(decision.id); record.notes = event.target.value; state.decisions[decision.id] = record; save(); });
+    }
+    function renderEvidence(choice) { return `<div class="evidence"><div class="choice-title"><h3>${choice.name}</h3><span class="badge">Current direction</span></div><p class="rationale">${choice.rationale}</p><div class="tradeoffs"><div class="tradeoff pro"><strong>Advantages</strong><ul>${choice.pros.map(item => `<li>${item}</li>`).join("")}</ul></div><div class="tradeoff con"><strong>Trade-offs</strong><ul>${choice.cons.map(item => `<li>${item}</li>`).join("")}</ul></div></div><a class="evidence-link" href="${choice.evidence}" target="_blank" rel="noreferrer">Review Microsoft evidence ↗</a></div>`; }
+    function chooseOption(decisionId, optionId) {
+      const decision = DECISIONS.find(item => item.id === decisionId); const old = selectedOption(decision); const next = decision.options.find(item => item.id === optionId); if (old && old.id === next.id) return;
+      const existing = current(decisionId); state.decisions[decisionId] = { ...existing, optionId, status: "decided" };
+      const affected = old ? markDependents(decisionId) : [];
+      state.history.unshift({ at: new Date().toISOString(), decision: decision.name, from: old ? old.name : "Open", to: next.name, rationale: existing.notes, affected });
+      save(); renderAll();
+    }
+    function markDependents(id, seen = new Set()) { dependentsOf(id).forEach(decision => { if (seen.has(decision.id)) return; seen.add(decision.id); const value = current(decision.id); if (value.optionId) state.decisions[decision.id] = { ...value, status: "review" }; markDependents(decision.id, seen); }); return [...seen].map(decisionId => DECISIONS.find(decision => decision.id === decisionId).name); }
+    function renderRoadmap() {
+      document.getElementById("roadmap").innerHTML = STAGES.map((stage, stageIndex) => `<section class="road-phase"><div class="phase-meta">${stage.phase}</div><h3>${stage.name}</h3><div class="road-items">${DECISIONS.filter(decision => decision.stage === stageIndex).map(decision => { const value = current(decision.id); const choice = selectedOption(decision); return `<article class="road-item ${value.status === "review" ? "review" : ""}"><strong>${choice ? choice.task : `Decide: ${decision.name}`}</strong><span>${value.status === "review" ? "Review after upstream pivot" : choice ? `Direction: ${choice.name}` : "Architecture decision open"}</span></article>`; }).join("")}</div></section>`).join("");
+    }
+    function renderLog() { document.getElementById("decisionLog").innerHTML = state.history.length ? `<div class="log-list">${state.history.map(entry => `<div class="log-item"><time>${new Date(entry.at).toLocaleString()}</time><strong>${escapeHtml(entry.decision)}</strong><div><strong>${escapeHtml(entry.from)} → ${escapeHtml(entry.to)}</strong>${entry.rationale ? `<span>Rationale at decision: ${escapeHtml(entry.rationale)}</span>` : ""}${entry.affected?.length ? `<span>Flagged for review: ${escapeHtml(entry.affected.join(", "))}</span>` : ""}</div></div>`).join("")}</div>` : `<div class="empty">Choices and pivots will appear here as the architecture evolves.</div>`; }
+    function updateCoverage() { const count = DECISIONS.filter(decision => current(decision.id).optionId).length; document.getElementById("coverageText").textContent = `${count} of ${DECISIONS.length} decided`; document.getElementById("coverageFill").style.width = `${count / DECISIONS.length * 100}%`; }
+    function renderAll() { renderGraph(); renderDetail(); renderRoadmap(); renderLog(); updateCoverage(); }
+    function loadStarter() {
+      state = { decisions: {}, history: [] };
+      const starter = { outcomes: "guided", sources: "cloud", boundary: "fabric", topology: "domain-topology", catalog: "fabric-catalog", identity: "hybrid-identity", storage: "onelake-authority", landing: "onelake", resilience: "single-region", ingestion: "fabric-pipelines", compute: "lakehouse", design: "medallion", semantic: "directlake", reporting: "governed-self-service", sharing: "internal-sharing", ai: "none", governance: "hybrid-governance", security: "saas", delivery: "simple", automation: "hybrid-automation", capacity: "shared", observability: "fabric-monitoring", finops: "showback", operations: "product-sre", adoption: "product" };
+      Object.entries(starter).forEach(([id, optionId]) => { const decision = DECISIONS.find(item => item.id === id); state.decisions[id] = { optionId, status: "decided", notes: "" }; state.history.push({ at: new Date().toISOString(), decision: decision.name, from: "Open", to: decision.options.find(item => item.id === optionId).name }); });
+      selectedId = "boundary"; save(); renderAll();
+    }
+    document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => { document.querySelectorAll(".tab").forEach(item => item.classList.toggle("active", item === tab)); document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.id === `${tab.dataset.view}View`)); }));
+    document.getElementById("starterBtn").addEventListener("click", loadStarter);
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+    document.getElementById("resetBtn").addEventListener("click", () => { if (!confirm("Clear the architecture, roadmap, and decision history?")) return; state = { decisions: {}, history: [] }; selectedId = "boundary"; localStorage.removeItem(STORAGE_KEY); renderAll(); });
+    renderAll();
+  </script>
+</body>
+</html>

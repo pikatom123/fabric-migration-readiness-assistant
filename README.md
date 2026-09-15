@@ -3,10 +3,11 @@
 An interactive prototype that helps Cloud Solution Architects assess analytics
 workloads for migration to Microsoft Fabric.
 
-## Version 1
+## Capabilities
 
-- Captures customer goals, constraints, scale, and governance context
-- Answers discovery questions using local, context-aware guided intelligence
+- Runs an adaptive Microsoft Foundry-powered architecture discovery interview
+- Chooses the next best question from previous answers and current unknowns
+- Extracts customer context, architecture facts, coverage, and workload candidates
 - Inventories workloads across Microsoft analytics and integration services
 - Maps workloads to Fabric patterns using explainable rules
 - Flags blockers, redesign needs, and optimisation opportunities
@@ -15,12 +16,14 @@ workloads for migration to Microsoft Fabric.
 
 ## Run locally
 
-Open `index.html` in a modern browser. The prototype is self-contained and saves
-assessment data in browser local storage.
+1. Install Node.js 22 or later and run `npm install`.
+2. Copy `.env.example` to `.env`.
+3. Sign in with Azure CLI using an identity that can access the Foundry project.
+4. Run `npm start`.
+5. Open `http://localhost:3000`.
 
-The discovery assistant runs entirely in the browser. It uses the captured
-customer context and explainable workload assessment rules; it does not send
-customer information to an external AI service.
+The browser never receives Azure credentials. The Node.js backend authenticates
+to Microsoft Foundry with `DefaultAzureCredential`.
 
 ## Disclaimer
 

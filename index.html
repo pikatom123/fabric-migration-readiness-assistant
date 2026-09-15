@@ -346,6 +346,42 @@
     .prompt-list { display: grid; gap: 8px; align-content: start; }
     .prompt-list .btn { text-align: left; white-space: normal; }
     .assistant-note { margin-top: 10px; color: var(--cp-text-muted); font-size: 11px; }
+    .interview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .progress-track {
+      height: 8px;
+      overflow: hidden;
+      border: 1px solid var(--cp-border);
+      border-radius: 999px;
+      background: var(--cp-surface-soft);
+    }
+    .progress-track span { display: block; height: 100%; background: var(--cp-accent); transition: width 180ms ease; }
+    .interview-status { margin-top: 6px; color: var(--cp-text-muted); font-size: 11px; }
+    .answer-row { display: flex; gap: 8px; margin-top: 10px; align-items: flex-end; }
+    .answer-row textarea { min-height: 72px; flex: 1; }
+    .quick-replies { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+    .coverage-list, .fact-list { display: grid; gap: 8px; }
+    .coverage-item, .fact-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--cp-border);
+      font-size: 12px;
+    }
+    .coverage-item:last-child, .fact-item:last-child { border-bottom: 0; padding-bottom: 0; }
+    .coverage-state { color: var(--cp-text-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    .coverage-state.complete { color: var(--cp-success); }
+    .coverage-state.partial { color: var(--cp-warning); }
+    .interview-placeholder { padding: 28px 18px; text-align: center; color: var(--cp-text-muted); }
+    .loading-dots { display: inline-flex; gap: 4px; margin-left: 4px; }
+    .loading-dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--cp-accent); }
     .estimator {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -456,47 +492,44 @@
         <section class="view active" id="discovery">
           <div class="hero">
             <div>
-              <h2>Understand the migration ambition</h2>
-              <p>Capture the customer, target outcomes, operating constraints, and scale assumptions that influence the recommended Fabric architecture.</p>
+              <h2>AI-guided architecture discovery</h2>
+              <p>Let the Fabric readiness interviewer lead a structured conversation, ask the next best question, and turn the answers into architecture inputs and a workload inventory.</p>
             </div>
           </div>
           <div class="card">
-            <h3>Customer context</h3>
-            <div class="card-sub">Saved locally in this browser while you work.</div>
-            <div class="grid two">
-              <div class="field"><label for="customerName">Customer name</label><input id="customerName" placeholder="Contoso Retail"></div>
-              <div class="field"><label for="industry">Industry</label><input id="industry" placeholder="Retail"></div>
-              <div class="field"><label for="region">Primary Azure region</label>
-                <select id="region"><option>UK South</option><option>North Europe</option><option>West Europe</option><option>East US</option><option>West US 2</option><option>Southeast Asia</option><option>Australia East</option><option>Other / undecided</option></select>
+            <div class="interview-header">
+              <div>
+                <h3>Architecture interview</h3>
+                <div class="card-sub">Powered by Microsoft Foundry · One focused question at a time</div>
               </div>
-              <div class="field"><label for="targetDate">Target migration date</label><input id="targetDate" type="date"></div>
-              <div class="field"><label for="users">Power BI users</label><input id="users" type="number" min="0" value="250"></div>
-              <div class="field"><label for="concurrentUsers">Peak concurrent users</label><input id="concurrentUsers" type="number" min="0" value="40"></div>
-              <div class="field"><label for="governance">Governance maturity</label>
-                <select id="governance"><option value="1">Ad hoc</option><option value="2" selected>Developing</option><option value="3">Established</option><option value="4">Managed</option></select>
-              </div>
-              <div class="field"><label for="strategy">Preferred migration strategy</label>
-                <select id="strategy"><option>Balanced</option><option>Fast replatform</option><option>Optimise before migration</option><option>Coexistence / phased</option></select>
+              <div class="actions">
+                <button class="btn small" id="restartInterviewBtn" type="button">Restart</button>
+                <button class="btn small primary" id="startInterviewBtn" type="button">Start interview</button>
               </div>
             </div>
-            <div class="field section-gap"><label for="outcomes">Business outcomes</label><textarea id="outcomes" placeholder="Reduce platform complexity, improve freshness, consolidate analytics..."></textarea></div>
-            <div class="field section-gap"><label for="constraints">Known constraints</label><textarea id="constraints" placeholder="Data residency, private networking, fixed reporting windows, specialist skills..."></textarea></div>
-          </div>
-          <div class="card section-gap">
-            <h3>Ask the readiness assistant</h3>
-            <div class="card-sub">Get contextual guidance from the information entered in this assessment.</div>
+            <div class="progress-track"><span id="interviewProgress" style="width:0%"></span></div>
+            <div class="interview-status" id="interviewStatus">Not started</div>
             <div class="assistant-layout">
               <div>
-                <div class="chat" id="assistantChat" aria-live="polite"></div>
-                <form class="ask-row" id="assistantForm">
-                  <input id="assistantQuestion" aria-label="Question for the readiness assistant" placeholder="Ask about migration risks, target patterns, capacity, or next steps..." autocomplete="off">
-                  <button class="btn primary" type="submit">Ask</button>
+                <div class="chat" id="assistantChat" aria-live="polite">
+                  <div class="interview-placeholder">Start the interview and the AI will establish the customer goals, estate, constraints, workload behavior, and migration priorities.</div>
+                </div>
+                <form id="assistantForm">
+                  <div class="quick-replies" id="quickReplies"></div>
+                  <div class="answer-row">
+                    <textarea id="assistantQuestion" aria-label="Answer the current discovery question" placeholder="Type your answer..." disabled></textarea>
+                    <button class="btn primary" id="sendAnswerBtn" type="submit" disabled>Send answer</button>
+                  </div>
                 </form>
-                <div class="assistant-note">Guided local assistant · No customer data leaves this browser · Validate recommendations against current Fabric documentation.</div>
+                <div class="assistant-note">Answers are sent securely to the configured Microsoft Foundry project. Authentication remains on the server and no credentials are exposed to the browser.</div>
               </div>
               <div>
-                <div class="field"><label>Suggested questions</label></div>
-                <div class="prompt-list" id="suggestedQuestions"></div>
+                <div class="field"><label>Discovery coverage</label></div>
+                <div class="coverage-list" id="coverageList"></div>
+                <div class="field section-gap"><label>Captured architecture facts</label></div>
+                <div class="fact-list" id="factList"></div>
+                <div class="field section-gap"><label>Emerging architecture direction</label></div>
+                <div class="fact-list" id="architectureHints"></div>
               </div>
             </div>
           </div>
@@ -641,13 +674,13 @@
         {id:"w6",name:"Order warehouse",type:"Azure SQL",size:1200,refresh:24,concurrency:80,complexity:"Medium",features:["cdc","private-network"],notes:"Operational replica used for analytics."},
         {id:"w7",name:"Exception notifications",type:"Logic Apps",size:5,refresh:350,concurrency:10,complexity:"Medium",features:["stateful"],notes:"Long-running approval and notification flow."}
       ],
-      conversation: []
+      discovery: {messages:[],facts:[],coverage:[],architectureHints:[],quickReplies:[],complete:false,started:false}
     };
     let state = loadState();
     let currentView = "discovery";
 
     function emptyState() {
-      return {context:{customerName:"",industry:"",region:"UK South",targetDate:"",users:250,concurrentUsers:40,governance:"2",strategy:"Balanced",outcomes:"",constraints:""},workloads:[],conversation:[]};
+      return {context:{customerName:"",industry:"",region:"UK South",targetDate:"",users:250,concurrentUsers:40,governance:"2",strategy:"Balanced",outcomes:"",constraints:""},workloads:[],discovery:{messages:[],facts:[],coverage:[],architectureHints:[],quickReplies:[],complete:false,started:false}};
     }
     function loadState() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || emptyState(); }
@@ -748,89 +781,104 @@
       return {status, pattern, risks, optimisations:[...new Set(optimisations)], questions};
     }
     function allAssessments() { return state.workloads.map(w => ({workload:w, ...assess(w)})); }
-    function discoveryGaps() {
-      const labels = {
-        customerName:"customer name", industry:"industry", targetDate:"target migration date",
-        outcomes:"business outcomes", constraints:"known constraints"
-      };
-      return Object.entries(labels).filter(([key]) => !String(state.context[key] || "").trim()).map(([,label]) => label);
-    }
-    function answerQuestion(question) {
-      readContext();
-      const q = question.toLowerCase();
-      const assessments = allAssessments();
-      const blocked = assessments.filter(a => a.status === "blocked");
-      const optimise = assessments.filter(a => a.status === "optimize");
-      const patterns = [...new Set(assessments.map(a => a.pattern))];
-      const gaps = discoveryGaps();
-      const customer = state.context.customerName || "this customer";
-
-      if (/missing|gap|discover|ask next|question/.test(q)) {
-        if (gaps.length) return `Complete ${gaps.join(", ")} first. Then confirm workload owners, business SLAs, peak processing windows, data residency, private connectivity, source-control maturity, and acceptance criteria.`;
-        const followUps = [...new Set(assessments.flatMap(a => a.questions))].slice(0, 4);
-        return followUps.length
-          ? `The highest-value follow-up questions are:\n• ${followUps.join("\n• ")}`
-          : "Add representative workloads next. For each one, capture scale, run frequency, concurrency, dependencies, ownership, and service-level objectives.";
-      }
-      if (/block|risk|redesign|unsupported/.test(q)) {
-        if (!assessments.length) return "No workloads have been added yet, so I cannot identify technical blockers. Add the highest-value and most complex workloads first.";
-        if (!blocked.length) return `No explicit blocker is currently flagged. ${optimise.length} workload${optimise.length === 1 ? " needs" : "s need"} optimisation or validation, especially around scale, networking, compatibility, and peak overlap.`;
-        return `${blocked.length} workload${blocked.length === 1 ? " has" : "s have"} a redesign signal:\n${blocked.map(a => `• ${a.workload.name}: ${a.risks.join(" ")}`).join("\n")}`;
-      }
-      if (/pattern|architecture|lakehouse|warehouse|direct lake|target/.test(q)) {
-        if (!patterns.length) return "Add workloads before selecting a target pattern. Fabric architecture should follow workload behavior rather than defaulting the whole estate to one storage or serving pattern.";
-        return `The current estate maps to these target patterns:\n• ${patterns.join("\n• ")}\nUse a phased architecture: prove one low-risk path, retain external services where Fabric is not the right runtime, and standardise governance across the shared data estate.`;
-      }
-      if (/capacity|sku|size|cost|estimator|performance/.test(q)) {
-        const totalGb = state.workloads.reduce((sum,w) => sum + Number(w.size || 0), 0);
-        const runs = state.workloads.reduce((sum,w) => sum + Number(w.refresh || 0), 0);
-        const overlaps = state.workloads.filter(w => w.features.includes("high-overlap")).length;
-        return `Use ${formatSize(totalGb)} active data, ${Number(state.context.concurrentUsers || 0).toLocaleString()} peak report users, ${runs.toLocaleString()} runs per day, and ${Math.max(1, overlaps)} assumed overlapping refresh window${overlaps === 1 ? "" : "s"} as starting SKU Estimator inputs. Add measured CU duration, query peaks, refresh duration, growth, and background-job overlap before choosing capacity.`;
-      }
-      if (/ready|score|position|summary/.test(q)) {
-        const counts = {ready:0,optimize:0,blocked:0};
-        assessments.forEach(a => counts[a.status]++);
-        return `${customer} has a directional readiness score of ${score()}% across ${assessments.length} workload${assessments.length === 1 ? "" : "s"}: ${counts.ready} ready, ${counts.optimize} to optimise, and ${counts.blocked} requiring redesign. This is a discovery aid, not a final migration approval.`;
-      }
-      if (/next|pilot|start|priority|recommend/.test(q)) {
-        const firstReady = assessments.find(a => a.status === "ready");
-        const firstRisk = blocked[0] || optimise[0];
-        const actions = [];
-        if (gaps.length) actions.push(`complete the missing discovery fields (${gaps.join(", ")})`);
-        if (firstReady) actions.push(`use "${firstReady.workload.name}" as a low-risk pilot candidate`);
-        if (firstRisk) actions.push(`run a focused design review for "${firstRisk.workload.name}"`);
-        actions.push("capture peak-hour telemetry and validate it in the Fabric SKU Estimator");
-        return `Recommended sequence:\n1. ${actions.join("\n2. ")}.`;
-      }
-      return `For ${customer}, I can help with readiness, blockers, target Fabric patterns, discovery gaps, capacity inputs, or recommended next steps. Ask one of the suggested questions, or add more workload detail so the guidance becomes more specific.`;
+    function ensureDiscovery() {
+      state.discovery = state.discovery || {};
+      state.discovery.messages = Array.isArray(state.discovery.messages) ? state.discovery.messages : [];
+      state.discovery.facts = Array.isArray(state.discovery.facts) ? state.discovery.facts : [];
+      state.discovery.coverage = Array.isArray(state.discovery.coverage) ? state.discovery.coverage : [];
+      state.discovery.architectureHints = Array.isArray(state.discovery.architectureHints) ? state.discovery.architectureHints : [];
+      state.discovery.quickReplies = Array.isArray(state.discovery.quickReplies) ? state.discovery.quickReplies : [];
+      return state.discovery;
     }
     function renderAssistant() {
-      if (!Array.isArray(state.conversation)) state.conversation = [];
-      const welcome = {
-        role:"assistant",
-        text:"I use the discovery details and workload rules in this assessment to provide contextual guidance. What would you like to understand?"
-      };
-      const messages = state.conversation.length ? state.conversation : [welcome];
+      const discovery = ensureDiscovery();
       const chat = document.getElementById("assistantChat");
-      chat.innerHTML = messages.map(m => `<div class="message ${m.role}"><span class="message-role">${m.role === "user" ? "You" : "Readiness assistant"}</span>${esc(m.text)}</div>`).join("");
+      chat.innerHTML = discovery.messages.length
+        ? discovery.messages.map(m => `<div class="message ${m.role}"><span class="message-role">${m.role === "user" ? "You" : "Fabric architecture interviewer"}</span>${esc(m.text)}</div>`).join("")
+        : `<div class="interview-placeholder">Start the interview and the AI will establish the customer goals, estate, constraints, workload behavior, and migration priorities.</div>`;
       chat.scrollTop = chat.scrollHeight;
-      const suggestions = [
-        "What discovery information is missing?",
-        "What are the biggest blockers?",
-        "Which Fabric patterns fit this estate?",
-        "What should we enter in the SKU Estimator?",
-        "What should we do next?"
-      ];
-      document.getElementById("suggestedQuestions").innerHTML = suggestions.map(q => `<button class="btn small suggested" type="button" data-question="${esc(q)}">${esc(q)}</button>`).join("");
-      document.querySelectorAll(".suggested").forEach(button => button.onclick = () => askAssistant(button.dataset.question));
+      const completeCount = discovery.coverage.filter(item => item.status === "complete").length;
+      const progress = discovery.coverage.length ? Math.round(completeCount / discovery.coverage.length * 100) : 0;
+      document.getElementById("interviewProgress").style.width = `${progress}%`;
+      document.getElementById("interviewStatus").textContent = discovery.complete ? `Discovery complete · ${progress}% coverage` : discovery.started ? `Interview in progress · ${progress}% coverage` : "Not started";
+      document.getElementById("coverageList").innerHTML = discovery.coverage.length
+        ? discovery.coverage.map(item => `<div class="coverage-item"><span>${esc(item.label)}</span><span class="coverage-state ${esc(item.status)}">${esc(item.status)}</span></div>`).join("")
+        : `<span class="muted">Coverage appears as the interview progresses.</span>`;
+      document.getElementById("factList").innerHTML = discovery.facts.length
+        ? discovery.facts.slice(0, 10).map(item => `<div class="fact-item"><span>${esc(item.label)}</span><strong>${esc(item.value)}</strong></div>`).join("")
+        : `<span class="muted">No facts captured yet.</span>`;
+      document.getElementById("architectureHints").innerHTML = discovery.architectureHints.length
+        ? discovery.architectureHints.slice(0, 5).map(hint => `<div class="fact-item"><span>${esc(hint)}</span></div>`).join("")
+        : `<span class="muted">Direction appears once enough evidence is available.</span>`;
+      document.getElementById("quickReplies").innerHTML = discovery.quickReplies.map(reply => `<button class="btn small quick-reply" type="button">${esc(reply)}</button>`).join("");
+      document.querySelectorAll(".quick-reply").forEach(button => button.onclick = () => submitInterviewAnswer(button.textContent));
+      const canAnswer = discovery.started && !discovery.complete && !discovery.loading;
+      document.getElementById("assistantQuestion").disabled = !canAnswer;
+      document.getElementById("sendAnswerBtn").disabled = !canAnswer;
+      document.getElementById("startInterviewBtn").classList.toggle("hide", discovery.started);
     }
-    function askAssistant(question) {
-      const text = String(question || "").trim();
-      if (!text) return;
-      if (!Array.isArray(state.conversation)) state.conversation = [];
-      state.conversation.push({role:"user",text});
-      state.conversation.push({role:"assistant",text:answerQuestion(text)});
-      document.getElementById("assistantQuestion").value = "";
+    function mergeInterviewResult(result) {
+      const discovery = ensureDiscovery();
+      discovery.facts = result.facts || [];
+      discovery.coverage = result.coverage || [];
+      discovery.architectureHints = result.architectureHints || [];
+      discovery.quickReplies = result.quickReplies || [];
+      discovery.complete = Boolean(result.complete);
+      if (result.context) {
+        Object.entries(result.context).forEach(([key,value]) => {
+          if (value !== null && value !== "") state.context[key] = value;
+        });
+      }
+      (result.workloadCandidates || []).forEach(candidate => {
+        const existing = state.workloads.find(w => w.name.toLowerCase() === candidate.name.toLowerCase());
+        const workload = {
+          id: existing?.id || `discovery-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          name:candidate.name, type:candidate.type, size:candidate.size || 0,
+          refresh:candidate.refresh || 0, concurrency:candidate.concurrency || 0,
+          complexity:candidate.complexity, features:candidate.features || [], notes:candidate.notes || ""
+        };
+        if (existing) Object.assign(existing, workload); else state.workloads.push(workload);
+      });
+    }
+    async function callInterviewer(answer) {
+      const discovery = ensureDiscovery();
+      discovery.loading = true;
+      discovery.started = true;
+      if (answer) discovery.messages.push({role:"user",text:answer});
+      renderAssistant();
+      const chat = document.getElementById("assistantChat");
+      chat.insertAdjacentHTML("beforeend", `<div class="message assistant"><span class="message-role">Fabric architecture interviewer</span>Thinking<span class="loading-dots"><span></span><span></span><span></span></span></div>`);
+      chat.scrollTop = chat.scrollHeight;
+      try {
+        const response = await fetch("/api/discovery", {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+            messages:discovery.messages,
+            context:state.context,
+            workloads:state.workloads
+          })
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || "The interviewer could not respond.");
+        mergeInterviewResult(payload);
+        discovery.messages.push({role:"assistant",text:payload.assistantMessage});
+      } catch (error) {
+        discovery.messages.push({role:"assistant",text:`I could not continue the interview: ${error.message}`});
+      } finally {
+        discovery.loading = false;
+        document.getElementById("assistantQuestion").value = "";
+        saveState();
+        renderAll();
+      }
+    }
+    function submitInterviewAnswer(answer) {
+      const text = String(answer || "").trim();
+      if (!text || ensureDiscovery().loading) return;
+      callInterviewer(text);
+    }
+    function restartInterview() {
+      state.discovery = {messages:[],facts:[],coverage:[],architectureHints:[],quickReplies:[],complete:false,started:false};
       saveState();
       renderAssistant();
     }
@@ -908,8 +956,10 @@
 
       const patterns = {};
       assessments.forEach(a => patterns[a.pattern] = (patterns[a.pattern] || 0) + 1);
-      document.getElementById("targetPatterns").innerHTML = Object.keys(patterns).length
+      const interviewHints = ensureDiscovery().architectureHints;
+      document.getElementById("targetPatterns").innerHTML = Object.keys(patterns).length || interviewHints.length
         ? Object.entries(patterns).sort((a,b) => b[1]-a[1]).map(([p,n]) => `<div class="status-row"><span class="badge neutral">${n}</span><span>${esc(p)}</span></div>`).join("")
+          + interviewHints.map(hint => `<div class="status-row"><span class="badge neutral">AI</span><span>${esc(hint)}</span></div>`).join("")
         : `<span class="muted">No target patterns generated.</span>`;
 
       const steps = [];
@@ -998,9 +1048,11 @@
         switchView(order[order.indexOf(currentView) + 1]);
       };
       document.getElementById("printBtn").onclick = () => window.print();
+      document.getElementById("startInterviewBtn").onclick = () => callInterviewer("");
+      document.getElementById("restartInterviewBtn").onclick = restartInterview;
       document.getElementById("assistantForm").onsubmit = event => {
         event.preventDefault();
-        askAssistant(document.getElementById("assistantQuestion").value);
+        submitInterviewAnswer(document.getElementById("assistantQuestion").value);
       };
       document.getElementById("closeDialogBtn").onclick = document.getElementById("cancelDialogBtn").onclick = () => document.getElementById("workloadDialog").close();
       document.getElementById("workloadForm").onsubmit = event => {
@@ -1023,7 +1075,6 @@
         document.getElementById("workloadDialog").close();
         saveState(); renderAll();
       };
-      document.querySelectorAll("#discovery input, #discovery select, #discovery textarea").forEach(el => el.addEventListener("change", () => { saveState(); renderSummary(); }));
       renderAll();
     }
     init();

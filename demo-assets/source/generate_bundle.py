@@ -175,76 +175,130 @@ def paste_mobile_shot(image: Image.Image, shot_name: str, box: tuple[int, int, i
 def save_frames() -> list[Path]:
     frames: list[Path] = []
 
-    image, draw = base_frame("Hackathon prototype", "Fabric Migration Readiness\nand Optimisation Assistant")
-    draw_text(draw, (90, 330), "From fragmented estates to an explainable Fabric migration plan", 31, color=MUTED, max_width=1050)
-    for index, (label, color) in enumerate([("DISCOVER", TEAL), ("ASSESS", AMBER), ("MAP", ACCENT), ("SIZE", GREEN)]):
-        x = 92 + index * 300
-        rounded(draw, (x, 540, x + 250, 635), fill=SURFACE, outline=color, radius=18, width=3)
-        draw_text(draw, (x + 28, 570), label, 25, bold=True, color=color)
-    draw_text(draw, (92, 895), "Microsoft Fabric | CSA repeatable assessment workflow", 24, color=MUTED)
+    image, draw = base_frame("CSA-led customer engagement", "Fabric Migration Readiness\nand Optimisation Assistant")
+    draw_text(draw, (90, 330), "Start the right migration conversation before architecture and sizing decisions are made.", 34, color=MUTED, max_width=1320)
+    rounded(draw, (92, 525, 1775, 710), fill=SURFACE, outline=ACCENT, radius=22, width=3)
+    draw_text(draw, (145, 565), "A guided, evidence-led assessment that turns a mixed analytics estate into an explainable Fabric migration starting point.", 31, bold=True, max_width=1570)
+    for index, (label, color) in enumerate([("DISCOVER", TEAL), ("ASSESS", AMBER), ("RECOMMEND", ACCENT), ("SIZE", GREEN)]):
+        x = 92 + index * 420
+        draw_text(draw, (x, 815), label, 22, bold=True, color=color)
+        if index < 3:
+            draw.line((x + 180, 832, x + 375, 832), fill=f"#{BORDER}", width=4)
+    draw_text(draw, (92, 945), "Initial conversation → actionable migration direction", 24, color=MUTED)
     frames.append(FRAMES / "00-title.png"); image.save(frames[-1])
 
-    image, draw = base_frame("The problem", "Migration decisions are fragmented", "Customers do not arrive with a single platform or a single migration path.")
-    technologies = ["Power BI", "SSAS / AAS", "Azure SQL", "Synapse", "Databricks", "ADF", "Logic Apps", "Spark", "Runbooks"]
-    for i, technology in enumerate(technologies):
-        row, col = divmod(i, 3)
-        x, y = 90 + col * 365, 320 + row * 120
-        rounded(draw, (x, y, x + 320, y + 82), fill=SURFACE, outline=BORDER, radius=16)
-        draw_text(draw, (x + 24, y + 25), technology, 23, bold=True)
-    rounded(draw, (1240, 302, 1828, 790), fill="FFF8FA", outline=ACCENT, radius=24, width=3)
-    draw_text(draw, (1290, 345), "CSA challenge", 24, bold=True, color=ACCENT)
-    bullets = ["Ask the right follow-up questions", "Find blockers and redesign needs", "Map to Fabric target patterns", "Estimate capacity pressure", "Produce a customer-ready answer"]
-    y = 425
-    for bullet in bullets:
-        draw.ellipse((1294, y + 7, 1312, y + 25), fill=f"#{ACCENT}")
-        y = draw_text(draw, (1330, y), bullet, 23, max_width=430, spacing=6) + 20
+    image, draw = base_frame("Why this is needed", "The first migration conversation is harder than it should be", "Customers know they want to explore Fabric, but rarely know where to start or what must change.")
+    problems = [
+        ("Fragmented estate", "Power BI, Synapse, SQL, Databricks, Spark, pipelines, and reporting carry different dependencies.", TEAL),
+        ("Sizing too early", "Capacity discussions begin before workload behaviour, refresh overlap, concurrency, and growth are understood.", AMBER),
+        ("Hidden redesign", "Unsupported features, transformation placement, semantic-model design, and orchestration changes surface late.", RED),
+    ]
+    for index, (title, body, color) in enumerate(problems):
+        x = 88 + index * 590
+        rounded(draw, (x, 315, x + 535, 665), fill=SURFACE, outline=color, radius=20, width=3)
+        draw_text(draw, (x + 32, 355), f"0{index + 1}", 20, bold=True, color=color)
+        draw_text(draw, (x + 32, 410), title, 29, bold=True)
+        draw_text(draw, (x + 32, 485), body, 22, color=MUTED, max_width=455)
+    rounded(draw, (88, 750, 1773, 940), fill="FFF8FA", outline=ACCENT, radius=22, width=3)
+    draw_text(draw, (135, 790), "PROBLEM SOLVED", 20, bold=True, color=ACCENT)
+    draw_text(draw, (135, 845), "Give the CSA a consistent way to structure discovery, expose risks early, and leave the customer with a credible next step.", 29, bold=True, max_width=1570)
     frames.append(FRAMES / "01-problem.png"); image.save(frames[-1])
 
-    image, draw = base_frame("The solution", "Three intake paths. One governed assessment.", "Facts remain explicit; unknowns stay unknown until the CSA confirms them.")
-    cards = [
-        ("Excel / CSV", "Inventory template\nBrowser-ready CSV export", TEAL),
-        ("PDF", "CLI or Copilot extraction\nHuman confirmation required", AMBER),
-        ("Manual", "Guided customer discovery\nWorkload-by-workload facts", ACCENT),
+    image, draw = base_frame("Who uses it", "Built for the people shaping the migration decision", "CSA-led, customer-collaborative, and useful before a formal migration assessment begins.")
+    users = [
+        ("Primary user", "Cloud Solution Architect", "Lead discovery, challenge assumptions, identify blockers, and frame the migration path.", ACCENT),
+        ("Customer collaborators", "Data & analytics leaders", "Confirm outcomes, constraints, priorities, risk tolerance, and investment appetite.", TEAL),
+        ("Technical contributors", "BI, data, and platform teams", "Validate workload facts, dependencies, performance behaviour, and redesign effort.", AMBER),
+        ("Decision audience", "Sponsors & architects", "Understand readiness, risk, required change, sequencing, and next-step evidence.", GREEN),
     ]
-    for i, (title, body, color) in enumerate(cards):
-        x = 86 + i * 430
-        rounded(draw, (x, 310, x + 380, 580), fill=SURFACE, outline=color, radius=24, width=3)
-        draw_text(draw, (x + 30, 350), title, 30, bold=True, color=color)
-        draw_text(draw, (x + 30, 430), body, 22, color=MUTED, max_width=315)
-        draw.line((x + 380, 445, x + 418, 445), fill=f"#{BORDER}", width=5)
-    rounded(draw, (1385, 300, 1832, 590), fill="FFF8FA", outline=ACCENT, radius=28, width=4)
-    draw_text(draw, (1430, 355), "Assistant", 34, bold=True, color=ACCENT)
-    draw_text(draw, (1430, 435), "Discovery\nRules engine\nLearn evidence\nSpecialist skills", 24, color=MUTED)
-    draw.line((960, 720, 960, 820), fill=f"#{ACCENT}", width=5)
-    rounded(draw, (430, 820, 1490, 980), fill=SURFACE, outline=GREEN, radius=24, width=3)
-    draw_text(draw, (485, 862), "Customer-ready output: readiness + target patterns + risks + next steps + SKU inputs", 27, bold=True, color=GREEN, max_width=950)
+    for index, (label, title, body, color) in enumerate(users):
+        col, row = index % 2, index // 2
+        x, y = 88 + col * 880, 300 + row * 330
+        rounded(draw, (x, y, x + 815, y + 275), fill=SURFACE, outline=color, radius=20, width=3)
+        draw_text(draw, (x + 32, y + 30), label.upper(), 18, bold=True, color=color)
+        draw_text(draw, (x + 32, y + 78), title, 29, bold=True)
+        draw_text(draw, (x + 32, y + 145), body, 22, color=MUTED, max_width=735)
     frames.append(FRAMES / "02-inputs.png"); image.save(frames[-1])
 
-    for frame_name, kicker, title, subtitle, shot, callouts in [
-        ("03-discovery.png", "Prototype step 1", "Capture customer context", "Outcomes, constraints, region, users, concurrency, and preferred migration strategy.", "01-discovery.png", ["Manual customer context", "Upload Excel-exported CSV", "PDF handoff to Copilot or CLI"]),
-        ("04-inventory.png", "Prototype step 2", "Build the estate inventory", "Imported facts remain unconfirmed until workload-specific discovery is complete.", "02-workloads.png", ["Needs Discovery by default", "Edit scale and dependencies", "Start adaptive AI discovery"]),
-        ("05-assessment.png", "Prototype step 3", "Map, explain, and challenge", "Every workload exposes its Fabric pattern, blockers, optimisations, and open questions.", "03-assessment.png", ["Directional readiness profile", "Fabric target pattern", "Blockers, actions, and questions"]),
-        ("06-summary.png", "Prototype step 4", "Deliver an executive-ready summary", "Readiness position, target patterns, next steps, and directional SKU Estimator inputs.", "04-summary.png", ["Executive migration position", "Prioritised next steps", "Capacity-sizing inputs"]),
-    ]:
-        image, draw = base_frame(kicker, title, subtitle)
-        rounded(draw, (85, 270, 575, 1020), fill=SURFACE, outline=BORDER, radius=24)
-        paste_mobile_shot(image, shot, (115, 292, 545, 998))
-        draw_text(draw, (650, 300), "WHAT THE CSA SEES", 22, bold=True, color=ACCENT)
-        for index, callout in enumerate(callouts, start=1):
-            y = 365 + (index - 1) * 185
-            rounded(draw, (650, y, 1815, y + 140), fill=SURFACE, outline=[TEAL, AMBER, GREEN][index - 1], radius=20, width=3)
-            draw.ellipse((685, y + 42, 741, y + 98), fill=f"#{[TEAL, AMBER, GREEN][index - 1]}")
-            draw_text(draw, (704, y + 53), str(index), 22, bold=True, color="FFFFFF")
-            draw_text(draw, (780, y + 48), callout, 28, bold=True, max_width=970)
-        draw_text(draw, (650, 955), "Responsive browser prototype • customer data remains local", 21, color=MUTED)
-        frames.append(FRAMES / frame_name); image.save(frames[-1])
+    image, draw = base_frame("The engagement moment", "A better initial conversation with the customer", "The assistant creates structure without pretending incomplete discovery is complete.")
+    stages = [
+        ("BEFORE", "Bring what exists", "Upload an Excel-exported CSV, use a PDF through Copilot/CLI, or start manually.", TEAL),
+        ("DURING", "Ask what matters", "Capture outcomes, constraints, scale, concurrency, refresh overlap, dependencies, and critical features.", ACCENT),
+        ("AFTER", "Leave with direction", "Summarise readiness, target patterns, risks, design changes, actions, and sizing inputs.", GREEN),
+    ]
+    for index, (stage, title, body, color) in enumerate(stages):
+        x = 88 + index * 590
+        rounded(draw, (x, 325, x + 535, 735), fill=SURFACE, outline=color, radius=20, width=3)
+        draw_text(draw, (x + 32, 365), stage, 20, bold=True, color=color)
+        draw_text(draw, (x + 32, 430), title, 29, bold=True)
+        draw_text(draw, (x + 32, 510), body, 23, color=MUTED, max_width=455)
+        if index < 2:
+            draw.line((x + 535, 530, x + 580, 530), fill=f"#{BORDER}", width=5)
+    rounded(draw, (250, 825, 1610, 965), fill="FFF8FA", outline=ACCENT, radius=20, width=3)
+    draw_text(draw, (305, 865), "Unknown facts remain Needs Discovery until the customer confirms them.", 29, bold=True, color=ACCENT, max_width=1250)
+    frames.append(FRAMES / "03-discovery.png"); image.save(frames[-1])
 
-    image, draw = base_frame("Why it matters", "A repeatable assessment, not a one-off opinion")
+    image, draw = base_frame("What it assesses", "Beyond migration mapping: readiness and optimisation", "The recommendation considers whether each workload should migrate, change, coexist, or remain where it is.")
+    checks = [
+        ("Target pattern", "Direct Lake, Warehouse, Lakehouse, Data Factory, Real-Time Intelligence, or Power BI", TEAL),
+        ("Blockers", "Unsupported features, connectivity, security, orchestration, custom code, and operating constraints", RED),
+        ("Design changes", "Semantic-model redesign, Gold-layer transformations, pipeline changes, and workload decomposition", AMBER),
+        ("Optimisation", "Refresh overlap, model efficiency, data movement, Spark strategy, and capacity pressure", GREEN),
+    ]
+    for index, (title, body, color) in enumerate(checks):
+        col, row = index % 2, index // 2
+        x, y = 88 + col * 880, 300 + row * 320
+        rounded(draw, (x, y, x + 815, y + 265), fill=SURFACE, outline=color, radius=20, width=3)
+        draw_text(draw, (x + 32, y + 35), title, 28, bold=True, color=color)
+        draw_text(draw, (x + 32, y + 105), body, 22, color=MUTED, max_width=735)
+    draw_text(draw, (90, 950), "Examples: Direct Lake suitability • calculated columns into Gold • refresh collisions • Spark/pipeline redesign", 23, bold=True, color=ACCENT, max_width=1700)
+    frames.append(FRAMES / "04-inventory.png"); image.save(frames[-1])
+
+    image, draw = base_frame("What the customer receives", "An explainable starting point for the migration journey", "Not a black-box verdict and not a capacity quote: a transparent recommendation grounded in confirmed facts.")
+    outputs = [
+        ("Readiness score", "Directional position by workload", TEAL),
+        ("Target patterns", "Recommended Fabric landing zones", ACCENT),
+        ("Risks & blockers", "What could delay or prevent migration", RED),
+        ("Required changes", "What must be redesigned or optimised", AMBER),
+        ("Action plan", "Prioritised questions and next steps", GREEN),
+        ("SKU inputs", "Volume, movement, concurrency, overlap, and growth", TEAL),
+    ]
+    for index, (title, body, color) in enumerate(outputs):
+        col, row = index % 3, index // 3
+        x, y = 88 + col * 590, 305 + row * 300
+        rounded(draw, (x, y, x + 535, y + 245), fill=SURFACE, outline=color, radius=18, width=3)
+        draw_text(draw, (x + 30, y + 35), title, 26, bold=True, color=color)
+        draw_text(draw, (x + 30, y + 105), body, 21, color=MUTED, max_width=455)
+    rounded(draw, (320, 920, 1540, 1010), fill="FFF8FA", outline=ACCENT, radius=18, width=3)
+    draw_text(draw, (375, 946), "Outcome: agreement on where deeper assessment should focus next.", 25, bold=True, color=ACCENT)
+    frames.append(FRAMES / "05-assessment.png"); image.save(frames[-1])
+
+    image, draw = base_frame("How it stays current", "A maintained skill, not a static questionnaire", "The conversational workflow and deterministic assessment knowledge can evolve independently of the user experience.")
+    layers = [
+        ("Guided skill", "Controls the CSA conversation, asks adaptive questions, and preserves unknowns.", ACCENT),
+        ("Versioned rules", "Maps confirmed facts to patterns, blockers, readiness, and optimisation actions.", TEAL),
+        ("Current evidence", "Microsoft Learn grounding and specialist Fabric skills validate changing capabilities.", GREEN),
+        ("Feedback loop", "Real engagements add questions, edge cases, evidence, and regression tests.", AMBER),
+    ]
+    for index, (title, body, color) in enumerate(layers):
+        x, y = 90 + index * 430, 330
+        rounded(draw, (x, y, x + 385, y + 360), fill=SURFACE, outline=color, radius=20, width=3)
+        draw_text(draw, (x + 28, y + 35), f"0{index + 1}", 19, bold=True, color=color)
+        draw_text(draw, (x + 28, y + 92), title, 27, bold=True)
+        draw_text(draw, (x + 28, y + 165), body, 21, color=MUTED, max_width=320)
+        if index < 3:
+            draw.line((x + 385, y + 180, x + 420, y + 180), fill=f"#{BORDER}", width=5)
+    rounded(draw, (250, 790, 1610, 955), fill="FFF8FA", outline=ACCENT, radius=22, width=3)
+    draw_text(draw, (305, 830), "Maintain → validate → version → test → release", 28, bold=True, color=ACCENT)
+    draw_text(draw, (305, 885), "Recommendations remain repeatable while Fabric capabilities continue to change.", 23, color=MUTED)
+    frames.append(FRAMES / "06-summary.png"); image.save(frames[-1])
+
+    image, draw = base_frame("Why it matters", "Turn uncertainty into a credible next conversation", "The prototype demonstrates the journey from estate intake to an explainable, customer-ready recommendation.")
     outcomes = [
-        ("FASTER", "Start with an inventory and focus the conversation", TEAL),
-        ("EXPLAINABLE", "Trace findings to customer facts and explicit rules", ACCENT),
-        ("ACTIONABLE", "Separate migration-ready, optimise, redesign, and retain", AMBER),
-        ("SIZABLE", "Collect inputs needed for the Fabric SKU Estimator", GREEN),
+        ("FOR THE CSA", "A repeatable way to lead initial migration discovery", ACCENT),
+        ("FOR THE CUSTOMER", "Clarity on readiness, risk, change, and next steps", TEAL),
+        ("FOR DELIVERY", "Earlier visibility of redesign and dependency work", AMBER),
+        ("FOR FABRIC", "Better-qualified sizing and architecture conversations", GREEN),
     ]
     for i, (label, body, color) in enumerate(outcomes):
         col, row = i % 2, i // 2
@@ -252,7 +306,8 @@ def save_frames() -> list[Path]:
         rounded(draw, (x, y, x + 820, y + 205), fill=SURFACE, outline=color, radius=22, width=3)
         draw_text(draw, (x + 34, y + 35), label, 24, bold=True, color=color)
         draw_text(draw, (x + 34, y + 90), body, 25, max_width=735)
-    draw_text(draw, (90, 915), "Next: pilot on real estates | expand native imports | connect measured capacity telemetry", 27, bold=True, color=ACCENT)
+    draw_text(draw, (90, 885), "HACKATHON ASK", 20, bold=True, color=ACCENT)
+    draw_text(draw, (90, 930), "Pilot with CSAs on real customer estates, then expand evidence, telemetry, and non-Microsoft coverage.", 28, bold=True, max_width=1700)
     frames.append(FRAMES / "07-impact.png"); image.save(frames[-1])
     return frames
 
@@ -293,14 +348,14 @@ def add_frame_slide(prs: Presentation, frame: Path, notes: str) -> None:
 def build_deck(frames: list[Path]) -> Path:
     prs = Presentation(); prs.slide_width = SLIDE_W; prs.slide_height = SLIDE_H
     notes = [
-        "Introduce the prototype and the outcome: a repeatable Fabric migration assessment.",
-        "Explain the fragmented estate and why ad hoc assessment is slow and inconsistent.",
-        "Show the three supported intake routes and the governed assessment flow.",
-        "The discovery screen captures business context and measurable workload pressure.",
-        "Spreadsheet inventory is saved as CSV for browser upload; PDF uses Copilot or CLI; manual entry is available.",
-        "The engine maps workloads and explains blockers, optimisation actions, and open questions.",
-        "The summary is customer-ready and includes directional inputs for the SKU Estimator, not a capacity quote.",
-        "Close on impact and the path from hackathon prototype to a validated engagement tool.",
+        "Open with the engagement outcome: help a CSA start the right migration conversation before architecture and sizing decisions are made.",
+        "Explain why the initial conversation is difficult: fragmented workloads, premature sizing, and redesign needs that surface too late.",
+        "Name the primary user and collaborators: the CSA leads, customer leaders set outcomes, technical teams confirm facts, and sponsors consume the recommendation.",
+        "Show how the assistant supports the engagement before, during, and after the customer conversation while keeping unknowns explicit.",
+        "Explain that the assessment goes beyond mapping: it tests blockers, required design changes, optimisation opportunities, and capacity pressure.",
+        "Describe the customer-ready output and reinforce that SKU data is directional estimator input, not a capacity quote.",
+        "Position the solution as a maintained skill with versioned deterministic rules, current Microsoft Learn evidence, specialist skills, and engagement feedback.",
+        "Close on the value to the CSA, customer, delivery team, and Fabric conversation; ask to pilot it on real customer estates.",
     ]
     for frame, note in zip(frames, notes):
         add_frame_slide(prs, frame, note)
@@ -353,9 +408,7 @@ def write_supporting_files() -> None:
 def main() -> None:
     frames = save_frames()
     build_deck(frames)
-    build_inputs()
-    write_supporting_files()
-    print(f"Generated {len(frames)} frames and presentation assets in {OUT}")
+    print(f"Generated {len(frames)} frames and presentation deck in {OUT}")
 
 
 if __name__ == "__main__":

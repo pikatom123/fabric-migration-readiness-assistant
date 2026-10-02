@@ -21,6 +21,14 @@ async function upload(fileName) {
 
 await page.goto(appUrl);
 await reset();
+await page.locator("#sampleBtn").click();
+const assessedRows = await page.locator("#workloadRows tr").count();
+const assessedReady = await page.locator("#workloadRows .badge.ready").count();
+const assessedOptimise = await page.locator("#workloadRows .badge.optimize").count();
+const assessedRedesign = await page.locator("#workloadRows .badge.blocked").count();
+const assessedScore = await page.locator("#scoreRing").innerText();
+
+await reset();
 const largeStatus = await upload("Fabrikam_Manufacturing_Large_Estate.csv");
 const largeRows = await page.locator("#workloadRows tr").count();
 const largeDiscovery = await page.locator("#workloadRows").getByText("Needs Discovery", { exact: true }).count();
@@ -37,10 +45,11 @@ await reset();
 const invalidStatus = await upload("Invalid_Missing_Headers.csv");
 const invalidRows = await page.locator("#workloadRows .edit").count();
 
-const result = { largeStatus, largeRows, largeDiscovery, mixedStatus, mixedRows, markupRenderedAsText: markupNotes.includes("<script>"), invalidStatus, invalidRows };
+const result = { assessedRows, assessedReady, assessedOptimise, assessedRedesign, assessedScore, largeStatus, largeRows, largeDiscovery, mixedStatus, mixedRows, markupRenderedAsText: markupNotes.includes("<script>"), invalidStatus, invalidRows };
 console.log(JSON.stringify(result, null, 2));
 
 const failures = [];
+if (assessedRows !== 20 || assessedReady !== 4 || assessedOptimise !== 11 || assessedRedesign !== 5 || assessedScore !== "62%") failures.push("mixed assessed sample");
 if (!largeStatus.includes("Imported 20 workloads")) failures.push("large import status");
 if (largeRows !== 20 || largeDiscovery < 20) failures.push("large imported rows");
 if (!mixedStatus.includes("Imported 5 workloads") || !mixedStatus.includes("Skipped rows: 4, 5")) failures.push("mixed import status");

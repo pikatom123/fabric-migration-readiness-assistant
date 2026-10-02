@@ -1,0 +1,37 @@
+{
+  "context": {
+    "customerName": "Fabrikam Manufacturing",
+    "industry": "Manufacturing",
+    "region": "West Europe",
+    "targetDate": "2027-09-30",
+    "users": 4200,
+    "concurrentUsers": 480,
+    "governance": "2",
+    "strategy": "Coexistence / phased",
+    "outcomes": "Unify plant, supply-chain, finance, and telemetry analytics while reducing duplicated platforms and data movement.",
+    "constraints": "Private connectivity and EU residency are mandatory. Plant operations cannot tolerate ingestion downtime. Month-end closes in three hours."
+  },
+  "workloads": [
+    {"id":"fab-01","name":"Global operations executive model","type":"Power BI","size":180,"refresh":14,"concurrency":320,"complexity":"High","features":["calculated-columns","composite-model","high-overlap"],"notes":"Confirmed composite model and peak refresh overlap."},
+    {"id":"fab-02","name":"Plant performance dashboards","type":"Power BI","size":95,"refresh":24,"concurrency":210,"complexity":"Medium","features":[],"notes":"Confirmed standard semantic model features; ready for target-pattern validation."},
+    {"id":"fab-03","name":"Supply chain planning model","type":"Power BI","size":240,"refresh":6,"concurrency":90,"complexity":"Medium","features":[],"notes":"Confirmed import model with supported security design."},
+    {"id":"fab-04","name":"Finance consolidation cube","type":"SSAS / Azure Analysis Services","size":780,"refresh":1,"concurrency":65,"complexity":"High","features":["calculated-columns"],"notes":"Tabular model; transformation pushdown opportunity."},
+    {"id":"fab-05","name":"Legacy production cube","type":"SSAS / Azure Analysis Services","size":1450,"refresh":1,"concurrency":45,"complexity":"High","features":["unsupported-model"],"notes":"Confirmed MDX and writeback dependency requires redesign."},
+    {"id":"fab-06","name":"Enterprise telemetry workspace","type":"Synapse","size":12500,"refresh":24,"concurrency":80,"complexity":"High","features":["private-network"],"notes":"Coexistence and workload separation recommended."},
+    {"id":"fab-07","name":"Quality analytics SQL pool","type":"Synapse","size":4200,"refresh":8,"concurrency":55,"complexity":"High","features":["unsupported-model"],"notes":"Dedicated-pool features require redesign validation."},
+    {"id":"fab-08","name":"Manufacturing operational replica","type":"Azure SQL","size":3100,"refresh":1440,"concurrency":120,"complexity":"Medium","features":["cdc","private-network"],"notes":"Mirroring and source-impact validation required."},
+    {"id":"fab-09","name":"Supplier collaboration database","type":"Azure SQL","size":680,"refresh":24,"concurrency":40,"complexity":"Medium","features":[],"notes":"Confirmed analytical replica candidate."},
+    {"id":"fab-10","name":"IoT feature engineering","type":"Databricks","size":18600,"refresh":12,"concurrency":35,"complexity":"High","features":["custom-libraries","private-network"],"notes":"Governed coexistence recommended for ML dependencies."},
+    {"id":"fab-11","name":"Predictive maintenance notebooks","type":"Databricks","size":5400,"refresh":6,"concurrency":20,"complexity":"High","features":["custom-libraries"],"notes":"Runtime and library compatibility testing required."},
+    {"id":"fab-12","name":"Enterprise ingestion factory","type":"Azure Data Factory","size":9200,"refresh":180,"concurrency":30,"complexity":"High","features":["self-hosted-ir","private-network"],"notes":"SHIR dependency is a confirmed blocker for as-is migration."},
+    {"id":"fab-13","name":"Partner file exchange","type":"Azure Data Factory","size":2600,"refresh":48,"concurrency":8,"complexity":"High","features":["custom-connector"],"notes":"Custom connector parity must be resolved."},
+    {"id":"fab-14","name":"Plant historian ingestion","type":"Azure Data Factory","size":7800,"refresh":96,"concurrency":16,"complexity":"High","features":["private-network"],"notes":"Private topology and large-scale ingestion benchmark needed."},
+    {"id":"fab-15","name":"Machine telemetry streaming","type":"Spark jobs","size":22400,"refresh":1440,"concurrency":40,"complexity":"High","features":["streaming"],"notes":"Real-time target pattern; latency and retention need benchmarking."},
+    {"id":"fab-16","name":"Nightly maintenance optimisation","type":"Spark jobs","size":4900,"refresh":1,"concurrency":12,"complexity":"Medium","features":[],"notes":"Confirmed standard Spark workload without custom runtime dependencies."},
+    {"id":"fab-17","name":"Factory exception approvals","type":"Logic Apps","size":12,"refresh":350,"concurrency":25,"complexity":"High","features":["stateful"],"notes":"Human approval and callbacks remain outside Fabric pipelines."},
+    {"id":"fab-18","name":"Supplier onboarding workflow","type":"Logic Apps","size":8,"refresh":80,"concurrency":10,"complexity":"Medium","features":[],"notes":"Retain application workflow and invoke Fabric for data operations."},
+    {"id":"fab-19","name":"Capacity start-stop automation","type":"Automation runbooks","size":2,"refresh":4,"concurrency":2,"complexity":"Low","features":[],"notes":"Retain control-plane automation and call Fabric APIs."},
+    {"id":"fab-20","name":"Data platform compliance runbooks","type":"Automation runbooks","size":4,"refresh":24,"concurrency":4,"complexity":"Medium","features":[],"notes":"External administration workflow with monitoring improvements."}
+  ],
+  "imports": [{"name":"Fabrikam_Mixed_Assessed_State.json","type":"confirmed-assessment","count":20}]
+}

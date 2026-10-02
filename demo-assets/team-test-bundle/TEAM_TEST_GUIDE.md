@@ -11,7 +11,29 @@ This pack tests a larger manufacturing estate and the browser's safety boundarie
 
 The page stores test data in browser local storage. Reset prevents one scenario from affecting another.
 
-## Scenario 1 - Large manufacturing estate
+## Scenario 1 - Mixed assessed manufacturing estate (primary test)
+
+This scenario represents a CSA who has already confirmed the key workload facts. It intentionally contains a realistic mix rather than marking everything Needs Discovery.
+
+Steps:
+
+1. Select **Reset**.
+2. Select **Load assessed sample**.
+3. Open **Workloads**, **Assessment**, and **Summary**.
+4. Expand several assessment cards and compare the status with the confirmed feature notes.
+
+Expected results:
+
+- 20 workloads load.
+- 4 workloads are Ready, 11 are Optimise, and 5 are Redesign.
+- Overall readiness is 62%.
+- The Summary shows approximately 96.2 TB and a capacity-watch message.
+- Assessment includes Direct Lake, Warehouse, Lakehouse, Data Factory, Real-Time Intelligence, retained Logic Apps, and retained Automation patterns.
+- Risks and optimisations reflect confirmed feature flags, not words parsed from notes.
+
+The included `Fabrikam_Mixed_Assessed_State.json` documents the exact confirmed test state embedded in the HTML.
+
+## Scenario 2 - Raw large-estate import guardrail
 
 File: `Fabrikam_Manufacturing_Large_Estate.csv`
 
@@ -48,7 +70,9 @@ Expected results:
 - The prompt includes Fabrikam context and all imported workloads.
 - Notes remain evidence only; words such as CDC, writeback, or custom connector do not automatically trigger rules.
 
-## Scenario 2 - Mixed-quality import
+This test remains intentionally Needs Discovery because CSV inventory alone is not confirmed assessment evidence.
+
+## Scenario 3 - Mixed-quality import
 
 File: `Mixed_Quality_Import.csv`
 
@@ -68,7 +92,7 @@ Expected results:
 - The quoted comma stays inside one notes field.
 - The `<script>` text is visible as text and never executes.
 
-## Scenario 3 - Missing required headers
+## Scenario 4 - Missing required headers
 
 File: `Invalid_Missing_Headers.csv`
 
@@ -77,7 +101,7 @@ Expected result:
 - No workload imports.
 - The page displays: `CSV must contain name and workload_type columns.`
 
-## Scenario 4 - Manual discovery
+## Scenario 5 - Manual discovery
 
 1. Reset the page.
 2. Select **Continue**, then **Add workload**.
@@ -93,7 +117,7 @@ Expected results:
 - Spark maps to Real-Time Intelligence, Eventstream, and Fabric Spark.
 - Summary shows capacity pressure because overlap or streaming is present.
 
-## Scenario 5 - Persistence and reset
+## Scenario 6 - Persistence and reset
 
 1. Import any valid CSV.
 2. Refresh the page.

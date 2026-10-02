@@ -88,8 +88,9 @@ discovery workflow.
 
 For team testing, share `demo-assets/output/Fabric_Migration_Readiness_Assistant_Team_Test_Bundle.zip`.
 It contains the standalone HTML, a 20-workload manufacturing estate, mixed-quality
-and invalid-header CSVs, expected results, and a feedback template. Extract the ZIP
-and open the HTML directly in Edge or Chrome; no installation is required.
+and invalid-header CSVs, expected results, and a feedback template. Its embedded
+assessed sample has 4 Ready, 11 Optimise, and 5 Redesign workloads for 62% readiness.
+Extract the ZIP and open the HTML directly in Edge or Chrome; no installation is required.
 
 ## Estate uploads
 

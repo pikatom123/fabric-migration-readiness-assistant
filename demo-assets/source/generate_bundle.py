@@ -22,6 +22,7 @@ ASSETS = ROOT / "demo-assets"
 SHOTS = ASSETS / "screenshots"
 OUT = ASSETS / "output"
 FRAMES = ASSETS / "source" / "frames"
+TEAM_IMAGE = ASSETS / "source" / "team-table-10.png"
 OUT.mkdir(parents=True, exist_ok=True)
 FRAMES.mkdir(parents=True, exist_ok=True)
 
@@ -175,16 +176,14 @@ def paste_mobile_shot(image: Image.Image, shot_name: str, box: tuple[int, int, i
 def save_frames() -> list[Path]:
     frames: list[Path] = []
 
-    image, draw = base_frame("CSA-led customer engagement", "Fabric Migration Readiness\nand Optimisation Assistant")
-    draw_text(draw, (90, 330), "Start the right migration conversation before architecture and sizing decisions are made.", 34, color=MUTED, max_width=1320)
-    rounded(draw, (92, 525, 1775, 710), fill=SURFACE, outline=ACCENT, radius=22, width=3)
-    draw_text(draw, (145, 565), "A guided, evidence-led assessment that turns a mixed analytics estate into an explainable Fabric migration starting point.", 31, bold=True, max_width=1570)
-    for index, (label, color) in enumerate([("DISCOVER", TEAL), ("ASSESS", AMBER), ("RECOMMEND", ACCENT), ("SIZE", GREEN)]):
-        x = 92 + index * 420
-        draw_text(draw, (x, 815), label, 22, bold=True, color=color)
-        if index < 3:
-            draw.line((x + 180, 832, x + 375, 832), fill=f"#{BORDER}", width=4)
-    draw_text(draw, (92, 945), "Initial conversation → actionable migration direction", 24, color=MUTED)
+    team_image = Image.open(TEAM_IMAGE).convert("RGB")
+    scale = min(W / team_image.width, H / team_image.height)
+    team_image = team_image.resize(
+        (round(team_image.width * scale), round(team_image.height * scale)),
+        Image.Resampling.LANCZOS,
+    )
+    image = Image.new("RGB", (W, H), "#07182E")
+    image.paste(team_image, ((W - team_image.width) // 2, (H - team_image.height) // 2))
     frames.append(FRAMES / "00-title.png"); image.save(frames[-1])
 
     image, draw = base_frame("Why this is needed", "The first migration conversation is harder than it should be", "Customers know they want to explore Fabric, but rarely know where to start or what must change.")

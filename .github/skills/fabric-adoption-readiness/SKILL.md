@@ -1,6 +1,6 @@
 ---
 name: fabric-adoption-readiness
-description: "Run a conversational, evidence-grounded Microsoft Fabric adoption or migration readiness assessment. Use when a CSA asks to assess an analytics estate, discover migration blockers, map workloads to Fabric, prepare adoption recommendations, or generate a customer-ready readiness report. Covers Power BI, SSAS/AAS, Azure SQL, Synapse, Databricks, ADF, Logic Apps, Spark, and Automation runbooks."
+description: "Run or maintain a conversational, evidence-grounded Microsoft Fabric adoption or migration readiness assessment. Use when a CSA asks to assess an analytics estate, discover migration blockers, map workloads to Fabric, prepare adoption recommendations, generate a customer-ready readiness report, refresh current Fabric guidance, update readiness rules, validate product support, or release the reusable CSA assessment pack. Covers Power BI, SSAS/AAS, Azure SQL, Synapse, Databricks, ADF, Logic Apps, Spark, and Automation runbooks."
 ---
 
 # Fabric Adoption Readiness
@@ -98,3 +98,22 @@ Lead with blockers and `Needs Discovery` items. Explain that confidence is disco
 ## Intake contract
 
 Use `examples/sample_intake.yaml` as the shape. Keep raw customer answers in `answers`; keep documentation claims in `evidence`. Do not place agent-generated prose into either field without the user's confirmation or a source.
+
+## Refresh and release current guidance
+
+When asked to update the skill, validate current support, or release the CSA pack, follow `references/MAINTENANCE.md`. In summary:
+
+1. Identify the affected workload keys, product claims, questions, and deterministic rules.
+2. Run each affected `docs_query` through Microsoft Learn MCP and open the selected pages. Search snippets alone are not evidence.
+3. Record the narrow supported claim, URL, retrieval date, and affected rule. Preserve inconclusive findings as evidence limitations.
+4. Update `src/fabric_adoption_assistant/data/knowledge_base.yaml` only when opened evidence or reviewed field learning supports the change.
+5. Add both trigger and non-trigger regression tests. Include validation and report tests when contracts or output change.
+6. Run the full pytest suite and the three packaged browser scenarios.
+7. Require a second CSA review for changed blocker, target-pattern, or keep-outside-Fabric logic.
+8. Release with rules version, reviewer, evidence date, changed workloads, test result, and migration note.
+
+Do not automatically convert documentation text into rules, rewrite historical evidence, or publish unreviewed support claims. Existing customer assessments retain the rules and evidence versions used when they were produced.
+
+## Reuse across CSAs
+
+Use `docs/CSA_REUSE_PLAYBOOK.md` for engagement setup, roles, quality gates, and handoff. Store real customer artifacts outside the shared repository. Share only de-identified rule feedback and generic scenarios.

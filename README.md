@@ -93,6 +93,14 @@ scenarios score 66%, 64%, and 64% readiness with mixed Ready, Optimise, and
 Redesign outcomes. Extract the ZIP and open the HTML directly in Edge or Chrome;
 no installation is required.
 
+For CSA enablement, share
+`demo-assets/output/Fabric_Migration_Readiness_Assistant_CSA_Enablement_Kit.zip`.
+It combines the deck, two-minute video, standalone prototype, three validated
+industry scenarios, future-state architecture, CSA reuse playbook, workspace
+skill and agent, Microsoft Learn MCP configuration, deterministic engine, tests,
+version metadata, and SHA-256 artifact manifest. Start with `START_HERE.md` after
+extracting the ZIP.
+
 ## Estate uploads
 
 The Discovery screen in `index.html` includes an **Upload PDF or CSV** button.
@@ -105,8 +113,16 @@ CSV files are imported immediately in the browser using this contract:
 | `workload_type` | Yes | Supported canonical type or alias such as `Power BI`, `Azure SQL`, or `ADF` |
 | `size_gb` | No | Non-negative approximate size |
 | `notes` | No | Source notes copied without interpretation |
+| `assessment_confirmed` | No | `true`, `yes`, or `1` permits assessment from the optional confirmed fields |
+| `refresh_per_day` | No | Confirmed daily refresh count |
+| `concurrency` | No | Confirmed peak concurrency |
+| `complexity` | No | Confirmed `low`, `medium`, or `high` complexity |
+| `features` | No | Pipe-delimited known feature ids |
 
-Every browser-imported workload is marked **Needs Discovery**. The upload does not infer feature flags or readiness.
+Standard inventory rows are marked **Needs Discovery**. Rows are assessed only
+when `assessment_confirmed` is explicit and the assessment fields are supplied;
+the upload never infers those fields. This allows reviewed test or prior-discovery
+exports to reproduce an assessment without weakening the confirmation boundary.
 
 PDFs require text extraction and conversational confirmation. Selecting a PDF in the standalone page records no workload facts because a browser-only page cannot safely call the packaged Python parser. Attach the PDF in Copilot Chat, or run `import-estate`; the skill then presents an unconfirmed inventory for review. Scanned pages with no text are reported as requiring OCR.
 

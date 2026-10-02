@@ -11,6 +11,11 @@ TEAM TESTING
 - It includes the standalone HTML, valid Healthcare, Financial Services, and Energy & Utilities assessed CSVs at 66%, 64%, and 64% readiness, expected results, and a feedback template.
 - Recipients extract the ZIP and open Fabric_Migration_Readiness_Assistant.html directly in Edge or Chrome.
 
+COMPLETE CSA ENABLEMENT KIT
+- Share output/Fabric_Migration_Readiness_Assistant_CSA_Enablement_Kit.zip.
+- It includes the deck, synchronized video, prototype, three scenarios, test guide, future architecture, CSA reuse playbook, updateable skill, discovery agent, Microsoft Learn MCP configuration, deterministic engine, tests, version metadata, and SHA-256 manifest.
+- Recipients extract the ZIP and start with START_HERE.md.
+
 DEMO INPUTS
 - output/Contoso_Estate_Inventory.xlsx
   Customer inventory template for Excel. Save/export as CSV before browser upload.
@@ -36,3 +41,4 @@ REBUILDING
 5. Run demo-assets/source/generate_narration.ps1.
 6. Run demo-assets/source/build_video.ps1; FFmpeg is discovered from PATH or Winget.
 7. Run demo-assets/source/build_team_test_bundle.ps1 to rebuild the shareable test ZIP.
+8. Run demo-assets/source/build_csa_enablement_bundle.ps1 to rebuild the complete CSA kit.

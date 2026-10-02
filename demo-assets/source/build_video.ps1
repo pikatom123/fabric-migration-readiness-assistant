@@ -21,7 +21,7 @@ if (-not (Test-Path $roadmap)) { throw "Roadmap frame was not found." }
 
 $ffprobe = Join-Path (Split-Path -Parent $ffmpeg) "ffprobe.exe"
 $rawDuration = [double](& $ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $raw.FullName)
-$speed = $rawDuration / 108
+$speed = $rawDuration / 103
 $audioDuration = [double](& $ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $audio)
 $audioSpeed = $audioDuration / 118.5
 
@@ -35,7 +35,7 @@ $filters = @(
 $arguments = @(
     "-y",
     "-i", $raw.FullName,
-    "-loop", "1", "-t", "12", "-i", $roadmap,
+    "-loop", "1", "-t", "17", "-i", $roadmap,
     "-i", $audio,
     "-filter_complex", ($filters -join ";"),
     "-map", "[v]", "-map", "[a]",

@@ -14,8 +14,14 @@ const context = await browser.newContext({
   recordVideo: { dir: videoDir, size: { width: 1440, height: 900 } },
 });
 const page = await context.newPage();
+const startedAt = Date.now();
 
 const pause = milliseconds => page.waitForTimeout(milliseconds);
+
+async function waitUntil(seconds) {
+  const remaining = (seconds * 1000) - (Date.now() - startedAt);
+  if (remaining > 0) await pause(remaining);
+}
 
 async function humanClick(locator) {
   const box = await locator.boundingBox();
@@ -33,7 +39,7 @@ async function smoothScrollTo(locator) {
 await page.goto(appUrl, { waitUntil: "load" });
 await page.evaluate(() => localStorage.removeItem("fabric-readiness-prototype-v1"));
 await page.reload({ waitUntil: "load" });
-await pause(4000);
+await waitUntil(3);
 
 const uploadButton = page.locator("#uploadEstateBtn");
 const chooserPromise = page.waitForEvent("filechooser");
@@ -41,42 +47,42 @@ await humanClick(uploadButton);
 const chooser = await chooserPromise;
 await chooser.setFiles(csvPath);
 await page.waitForFunction(() => document.querySelector("#uploadStatus")?.textContent.includes("Imported 5"));
-await pause(5500);
+await waitUntil(13);
 
 await humanClick(page.locator("#nextBtn"));
-await pause(6500);
+await waitUntil(27.4);
 
 await humanClick(page.locator("#addWorkloadBtn"));
-await pause(5000);
+await waitUntil(38.8);
 await humanClick(page.locator("#closeDialogBtn"));
-await pause(1500);
+await waitUntil(40.1);
 
 await humanClick(page.locator('[data-view="discovery"]'));
-await pause(1200);
+await waitUntil(42.2);
 await humanClick(page.locator("#sampleBtn"));
-await pause(3000);
+await waitUntil(46);
 await humanClick(page.locator('[data-view="workloads"]'));
-await pause(5500);
+await waitUntil(54.6);
 
 await humanClick(page.locator("#nextBtn"));
-await pause(5500);
+await waitUntil(62);
 
 const assessmentCards = page.locator(".assessment");
 for (let index = 0; index < await assessmentCards.count(); index++) {
   const card = assessmentCards.nth(index);
   await smoothScrollTo(card);
   await humanClick(card.locator(".expand"));
-  await pause(3600);
+  await waitUntil(66.8 + (index * 4.1));
   await humanClick(card.locator(".expand"));
-  await pause(500);
 }
 
+await waitUntil(91.1);
 await humanClick(page.locator("#nextBtn"));
-await pause(7000);
+await waitUntil(95.8);
 await smoothScrollTo(page.locator("#targetPatterns"));
-await pause(5000);
+await waitUntil(99.2);
 await smoothScrollTo(page.locator("#estimatorInputs"));
-await pause(7500);
+await waitUntil(103);
 
 const rawVideo = await page.video().path();
 await context.close();

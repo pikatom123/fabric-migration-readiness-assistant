@@ -1,0 +1,6 @@
+name,workload_type,size_gb,notes
+Executive sales semantic model,Power BI,85,Shared model; composite mode and calculated columns
+Finance planning cube,SSAS,420,MDX scripts and writeback workflow
+Retail data integration,Azure Data Factory,2600,On-premises SQL Server and SAP through SHIR
+Customer feature engineering,Databricks,7400,Custom Python wheels and private networking
+Order analytics replica,Azure SQL,1200,Operational source with CDC requirements

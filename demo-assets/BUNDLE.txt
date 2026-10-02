@@ -1,0 +1,29 @@
+FABRIC MIGRATION READINESS AND OPTIMISATION ASSISTANT
+Hackathon presentation bundle
+
+START HERE
+1. Open output/Fabric_Migration_Readiness_Assistant_Hackathon_Deck.pptx.
+2. Play output/Fabric_Migration_Readiness_Assistant_2min_Demo.mp4.
+3. Use output/Fabric_Migration_Readiness_Assistant_Demo_Script.txt for the live-demo runbook and narration.
+
+DEMO INPUTS
+- output/Contoso_Estate_Inventory.xlsx
+  Customer inventory template for Excel. Save/export as CSV before browser upload.
+- output/Contoso_Estate_Inventory.csv
+  Browser-ready spreadsheet export. Imported rows remain Needs Discovery.
+- output/Contoso_Estate_Overview.pdf
+  Text-based PDF for the packaged import-estate CLI or Copilot discovery workflow.
+- Manual entry
+  Open index.html and use Add workload during the customer conversation.
+
+IMPORTANT BOUNDARIES
+- The browser page directly supports CSV and manual entry.
+- PDF extraction runs through the CLI or Copilot workflow; the browser does not infer PDF facts.
+- Native .xlsx upload is not implemented; use the included CSV export.
+- Capacity information is directional input for the Fabric SKU Estimator, not a capacity quote.
+- Recommendations must be validated with current Microsoft Learn guidance and representative workload telemetry.
+
+REBUILDING
+1. Run demo-assets/source/generate_bundle.py with Python packages: python-pptx, Pillow, reportlab, XlsxWriter.
+2. Generate Fabric_Migration_Readiness_Assistant_Narration.wav from the narration text using Windows speech synthesis.
+3. Run demo-assets/source/build_video.ps1 with FFmpeg available on PATH.

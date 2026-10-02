@@ -1,0 +1,11 @@
+Microsoft Fabric migrations rarely begin with one tidy platform. Customer estates span Power BI, Analysis Services, Azure SQL, Synapse, Databricks, Data Factory, Logic Apps, Spark, and automation. Today, a CSA must manually discover dependencies, check feature support, estimate capacity pressure, and turn all of that into a customer-ready recommendation. The result can be slow, inconsistent, and difficult to repeat.
+
+Our Fabric Migration Readiness and Optimisation Assistant creates one guided assessment workflow. We can start in three ways. For a spreadsheet inventory, use the included Excel template and save it as CSV for direct browser import. For architecture or estate PDFs, use the packaged CLI or Copilot discovery agent to extract text for confirmation. Or enter a workload manually during the customer conversation.
+
+The prototype captures customer outcomes, constraints, scale, concurrency, and workload dependencies. Imported inventory is never marked ready automatically. It stays in Needs Discovery until the CSA confirms the workload-specific facts.
+
+The assessment then maps each workload to an appropriate Fabric pattern. It identifies blockers, optimisation opportunities, and the next questions to ask. The deterministic rules engine keeps the result repeatable, while Microsoft Learn evidence and specialist Fabric skills support deeper validation.
+
+Finally, the summary turns technical findings into an executive position, target patterns, priority next steps, and directional SKU Estimator inputs such as data volume, daily movement, concurrency, refresh overlap, real-time demand, growth, and region.
+
+For this hackathon, the prototype demonstrates the complete journey from estate intake to an explainable customer-ready recommendation. The next step is to validate it on real engagements, expand native import options, and connect measured capacity telemetry for production-grade sizing.

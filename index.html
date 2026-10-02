@@ -1008,7 +1008,7 @@
         event.target.value = "";
       };
       document.getElementById("filterType").onchange = renderWorkloads;
-      document.getElementById("sampleBtn").onclick = () => { state = JSON.parse(JSON.stringify(sampleState)); saveState(); renderAll(); };
+      document.getElementById("sampleBtn").onclick = () => { state = JSON.parse(JSON.stringify(sampleState)); renderAll(); saveState(); };
       document.getElementById("resetBtn").onclick = () => { if (confirm("Reset the assessment and remove all workloads?")) { state = emptyState(); localStorage.removeItem(STORAGE_KEY); renderAll(); switchView("discovery"); } };
       document.getElementById("nextBtn").onclick = () => {
         if (currentView === "summary") return window.print();

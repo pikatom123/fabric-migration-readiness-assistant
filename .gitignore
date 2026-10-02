@@ -7,3 +7,8 @@ build/
 *.egg-info/
 demo-assets/source/frames/
 demo-assets/source/preview/
+demo-assets/walkthrough/node_modules/
+demo-assets/walkthrough/raw/
+demo-assets/walkthrough/review/
+demo-assets/walkthrough/roadmap.png
+demo-assets/walkthrough/screens/

@@ -3,7 +3,7 @@ Hackathon presentation bundle
 
 START HERE
 1. Open output/Fabric_Migration_Readiness_Assistant_Hackathon_Deck.pptx.
-2. Play output/Fabric_Migration_Readiness_Assistant_2min_Demo.mp4.
+2. Play output/Fabric_Migration_Readiness_Assistant_2min_Demo.mp4 for the full-screen prototype walkthrough.
 3. Use output/Fabric_Migration_Readiness_Assistant_Demo_Script.txt for the live-demo runbook and narration.
 
 DEMO INPUTS
@@ -25,5 +25,8 @@ IMPORTANT BOUNDARIES
 
 REBUILDING
 1. Run demo-assets/source/generate_bundle.py with Python packages: python-pptx, Pillow, reportlab, XlsxWriter.
-2. Generate Fabric_Migration_Readiness_Assistant_Narration.wav from the narration text using Windows speech synthesis.
-3. Run demo-assets/source/build_video.ps1 with FFmpeg available on PATH.
+2. In demo-assets/walkthrough, run npm install and npx playwright install chromium.
+3. Run node demo-assets/walkthrough/record_walkthrough.mjs to capture the prototype.
+4. Run node demo-assets/walkthrough/capture_roadmap.mjs to render the closing frame.
+5. Run demo-assets/source/generate_narration.ps1.
+6. Run demo-assets/source/build_video.ps1; FFmpeg is discovered from PATH or Winget.

@@ -80,10 +80,11 @@ Open `examples/sample_report.html` directly in a browser. It has no server or ex
 ## Hackathon presentation bundle
 
 The `demo-assets/` folder contains an editable eight-slide PowerPoint deck, an
-exact two-minute narrated MP4, a presenter runbook, and realistic Excel/CSV/PDF
-demo inputs. Start with `demo-assets/BUNDLE.txt` for the file index and live-demo
-sequence. The browser accepts the Excel inventory after it is saved as CSV;
-PDF extraction uses the packaged CLI or Copilot discovery workflow.
+exact two-minute narrated full-screen prototype walkthrough, a presenter runbook,
+and realistic Excel/CSV/PDF demo inputs. Start with `demo-assets/BUNDLE.txt` for
+the file index and live-demo sequence. The browser accepts the Excel inventory
+after it is saved as CSV; PDF extraction uses the packaged CLI or Copilot
+discovery workflow.
 
 ## Estate uploads
 

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beyond Microsoft roadmap</title>
+  <style>
+    :root {
+      --ink: #151515;
+      --muted: #626262;
+      --paper: #f7f6f2;
+      --panel: #ffffff;
+      --accent: #b5124b;
+      --line: #dedbd3;
+      --green: #24745a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "Aptos", "Segoe UI", sans-serif;
+    }
+    header {
+      height: 88px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 0 68px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+    .mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--accent);
+      border-radius: 10px;
+      font-size: 19px;
+      font-weight: 800;
+    }
+    .brand { font-size: 22px; font-weight: 750; }
+    .brand span { display: block; color: var(--muted); font-size: 13px; font-weight: 500; }
+    main { padding: 74px 104px 0; }
+    .eyebrow {
+      color: var(--accent);
+      font-size: 17px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    h1 {
+      max-width: 1120px;
+      margin: 12px 0 16px;
+      font-family: Georgia, serif;
+      font-size: 66px;
+      line-height: 1.06;
+      font-weight: 700;
+    }
+    .lede {
+      max-width: 1120px;
+      margin: 0 0 52px;
+      color: var(--muted);
+      font-size: 24px;
+      line-height: 1.45;
+    }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .item {
+      min-height: 238px;
+      padding: 28px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-top: 5px solid var(--accent);
+      border-radius: 8px;
+    }
+    .item:nth-child(2) { border-top-color: var(--green); }
+    .item:nth-child(3) { border-top-color: #3e67a8; }
+    .item:nth-child(4) { border-top-color: #7d5527; }
+    .number { color: var(--muted); font-size: 14px; font-weight: 700; }
+    h2 { margin: 28px 0 14px; font-size: 28px; letter-spacing: 0; }
+    .item p { margin: 0; color: var(--muted); font-size: 18px; line-height: 1.45; }
+    footer {
+      position: absolute;
+      left: 104px;
+      right: 104px;
+      bottom: 44px;
+      display: flex;
+      justify-content: space-between;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 16px;
+    }
+    footer strong { color: var(--ink); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="mark">F</div>
+    <div class="brand">Fabric Readiness<span>Migration &amp; optimisation</span></div>
+  </header>
+  <main>
+    <div class="eyebrow">Future roadmap</div>
+    <h1>One readiness workflow for the wider data estate</h1>
+    <p class="lede">Extend the same evidence-led discovery, dependency mapping, and explainable recommendations beyond today's Microsoft-first scope.</p>
+    <section class="grid">
+      <article class="item"><div class="number">01</div><h2>Snowflake</h2><p>Warehouses, usage telemetry, data sharing, and migration dependencies.</p></article>
+      <article class="item"><div class="number">02</div><h2>Databricks</h2><p>Deeper estate telemetry for jobs, Unity Catalog, clusters, and notebooks.</p></article>
+      <article class="item"><div class="number">03</div><h2>AWS &amp; GCP</h2><p>Cloud-native data stores, orchestration, streaming, and analytics services.</p></article>
+      <article class="item"><div class="number">04</div><h2>Enterprise sources</h2><p>Oracle, Teradata, and other platforms that shape the migration path.</p></article>
+    </section>
+  </main>
+  <footer><strong>Broader coverage. The same explainable recommendation.</strong><span>Fabric Migration Readiness and Optimisation Assistant</span></footer>
+</body>
+</html>

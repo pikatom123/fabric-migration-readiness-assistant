@@ -9,15 +9,16 @@ DEMO ASSETS
 - Contoso_Estate_Inventory.csv: browser-ready export of the same spreadsheet.
 - Contoso_Estate_Overview.pdf: text-based PDF for the CLI/Copilot extraction path.
 
-TWO-MINUTE LIVE DEMO RUNBOOK
+TWO-MINUTE PROTOTYPE WALKTHROUGH
 1. Open index.html in Edge or Chrome and select Reset.
 2. Explain the three intake paths: manual form, Excel saved as CSV, or PDF through Copilot/CLI.
 3. Select Upload PDF or CSV and choose Contoso_Estate_Inventory.csv.
-4. Open Workloads and point out that imported rows are Needs Discovery, not guessed as ready.
-5. Select Load sample to show a completed conversational assessment.
-6. Open Assessment and expand one workload to show blockers, optimisation actions, and questions.
-7. Open Summary to show executive position, target patterns, next steps, and SKU Estimator inputs.
-8. Close with: deterministic rules make it repeatable; Learn evidence and specialist Fabric skills keep it current.
+4. Select Continue and point out that imported rows are Needs Discovery, not guessed as ready.
+5. Open Add Workload to show manual conversational discovery fields.
+6. Select Load sample to show a completed assessment with confirmed facts.
+7. Open Assessment and expand every workload to show blockers, optimisation actions, and questions.
+8. Open Summary to show executive position, target patterns, next steps, and SKU Estimator inputs.
+9. Close on the roadmap for Snowflake, deeper Databricks telemetry, AWS/GCP, Oracle, and Teradata.
 
 IMPORTANT DEMO LANGUAGE
 - Say "Excel inventory saved as CSV"; the browser does not natively parse .xlsx.
@@ -26,14 +27,4 @@ IMPORTANT DEMO LANGUAGE
 
 
 VIDEO NARRATION
-Microsoft Fabric migrations rarely begin with one tidy platform. Customer estates span Power BI, Analysis Services, Azure SQL, Synapse, Databricks, Data Factory, Logic Apps, Spark, and automation. Today, a CSA must manually discover dependencies, check feature support, estimate capacity pressure, and turn all of that into a customer-ready recommendation. The result can be slow, inconsistent, and difficult to repeat.
-
-Our Fabric Migration Readiness and Optimisation Assistant creates one guided assessment workflow. We can start in three ways. For a spreadsheet inventory, use the included Excel template and save it as CSV for direct browser import. For architecture or estate PDFs, use the packaged CLI or Copilot discovery agent to extract text for confirmation. Or enter a workload manually during the customer conversation.
-
-The prototype captures customer outcomes, constraints, scale, concurrency, and workload dependencies. Imported inventory is never marked ready automatically. It stays in Needs Discovery until the CSA confirms the workload-specific facts.
-
-The assessment then maps each workload to an appropriate Fabric pattern. It identifies blockers, optimisation opportunities, and the next questions to ask. The deterministic rules engine keeps the result repeatable, while Microsoft Learn evidence and specialist Fabric skills support deeper validation.
-
-Finally, the summary turns technical findings into an executive position, target patterns, priority next steps, and directional SKU Estimator inputs such as data volume, daily movement, concurrency, refresh overlap, real-time demand, growth, and region.
-
-For this hackathon, the prototype demonstrates the complete journey from estate intake to an explainable customer-ready recommendation. The next step is to validate it on real engagements, expand native import options, and connect measured capacity telemetry for production-grade sizing.
+See Fabric_Migration_Readiness_Assistant_Narration.txt for the action-synchronised narration used by the rendered walkthrough.

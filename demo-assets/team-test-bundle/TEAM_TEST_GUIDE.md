@@ -1,129 +1,77 @@
 # Fabric Migration Readiness Assistant - Team Test Pack
 
-This pack tests a larger manufacturing estate and the browser's safety boundaries. No installation or web server is required.
+This pack contains two valid, CSA-confirmed assessments from different industries. Each CSV produces a realistic mixture of workloads that are Ready, need Optimisation, or require Redesign. No installation or web server is required.
 
 ## Start
 
 1. Extract the ZIP to a normal folder.
 2. Open `Fabric_Migration_Readiness_Assistant.html` in Edge or Chrome.
 3. Select **Reset** before each scenario.
-4. Keep browser zoom at 100%.
+4. Upload the scenario CSV from the Discovery page.
+5. Review Workloads, Assessment, and Summary.
 
-The page stores test data in browser local storage. Reset prevents one scenario from affecting another.
+The extended CSV fields represent facts already confirmed by a CSA. A basic inventory CSV without `assessment_confirmed=true` still remains Needs Discovery.
 
-## Scenario 1 - Mixed assessed manufacturing estate (primary test)
+## Scenario 1 - Northwind Healthcare
 
-This scenario represents a CSA who has already confirmed the key workload facts. It intentionally contains a realistic mix rather than marking everything Needs Discovery.
+File: `Northwind_Healthcare_Assessed_Estate.csv`
 
-Steps:
-
-1. Select **Reset**.
-2. Select **Load assessed sample**.
-3. Open **Workloads**, **Assessment**, and **Summary**.
-4. Expand several assessment cards and compare the status with the confirmed feature notes.
-
-Expected results:
-
-- 20 workloads load.
-- 4 workloads are Ready, 11 are Optimise, and 5 are Redesign.
-- Overall readiness is 62%.
-- The Summary shows approximately 96.2 TB and a capacity-watch message.
-- Assessment includes Direct Lake, Warehouse, Lakehouse, Data Factory, Real-Time Intelligence, retained Logic Apps, and retained Automation patterns.
-- Risks and optimisations reflect confirmed feature flags, not words parsed from notes.
-
-The included `Fabrikam_Mixed_Assessed_State.json` documents the exact confirmed test state embedded in the HTML.
-
-## Scenario 2 - Raw large-estate import guardrail
-
-File: `Fabrikam_Manufacturing_Large_Estate.csv`
-
-Customer context to enter:
+Suggested customer context:
 
 | Field | Value |
 |---|---|
-| Customer | Fabrikam Manufacturing |
-| Industry | Manufacturing |
-| Region | West Europe |
-| Target date | 2027-09-30 |
-| Users | 4200 |
-| Peak concurrent users | 480 |
+| Customer | Northwind Health Network |
+| Industry | Healthcare |
+| Region | UK South |
+| Users | 2600 |
+| Peak concurrent users | 320 |
 | Strategy | Coexistence / phased |
-| Outcomes | Unify plant, supply-chain, finance, and telemetry analytics while reducing duplicated platforms and data movement. |
-| Constraints | Private connectivity and EU residency are mandatory. Plant operations cannot tolerate ingestion downtime. Month-end closes in three hours. |
-
-Steps:
-
-1. Upload the large-estate CSV.
-2. Confirm the status says **Imported 20 workloads**.
-3. Select **Continue**.
-4. Confirm every workload is **Needs Discovery**.
-5. Open **Assessment** and confirm readiness is `N/A`, not `0%`.
-6. Open **Summary** and inspect total estate volume and open discovery count.
-7. Refresh the browser and confirm all 20 workloads remain available.
-8. Select **Start AI discovery** and inspect the generated prompt.
+| Outcomes | Improve clinical and operational insight while consolidating duplicated analytics platforms. |
+| Constraints | Patient-data residency, private connectivity, and uninterrupted clinical ingestion are mandatory. |
 
 Expected results:
 
-- 20 workloads import and none are silently classified Ready, Optimise, or Redesign.
-- All nine supported workload families appear.
-- Total listed estate size is 96.151 TB, displayed as approximately 96.2 TB.
-- The prompt includes Fabrikam context and all imported workloads.
-- Notes remain evidence only; words such as CDC, writeback, or custom connector do not automatically trigger rules.
+- 14 valid workloads import as a confirmed assessment.
+- 4 are Ready, 7 need Optimisation, and 3 require Redesign.
+- Overall readiness is 66%.
+- Direct Lake, Warehouse, Lakehouse, Data Factory, Real-Time Intelligence, retained Logic Apps, and Automation patterns appear.
+- The hospital integration factory, legacy cube, and clinical approval workflow expose redesign blockers.
 
-This test remains intentionally Needs Discovery because CSV inventory alone is not confirmed assessment evidence.
+## Scenario 2 - Woodgrove Financial Services
 
-## Scenario 3 - Mixed-quality import
+File: `Woodgrove_Financial_Services_Assessed_Estate.csv`
 
-File: `Mixed_Quality_Import.csv`
+Suggested customer context:
 
-Steps:
-
-1. Reset the page.
-2. Upload the mixed-quality CSV.
-3. Inspect the upload message and Workloads table.
-4. Open the Markup safety check workload.
-
-Expected results:
-
-- Five workloads import.
-- Rows 4 and 5 are reported as skipped: unsupported Snowflake and missing workload name.
-- `power-bi` normalizes to Power BI.
-- The negative size is safely represented as 0 GB.
-- The quoted comma stays inside one notes field.
-- The `<script>` text is visible as text and never executes.
-
-## Scenario 4 - Missing required headers
-
-File: `Invalid_Missing_Headers.csv`
-
-Expected result:
-
-- No workload imports.
-- The page displays: `CSV must contain name and workload_type columns.`
-
-## Scenario 5 - Manual discovery
-
-1. Reset the page.
-2. Select **Continue**, then **Add workload**.
-3. Add a Power BI workload with calculated columns, composite model, and high overlap.
-4. Add an Azure Data Factory workload with SHIR and a custom connector.
-5. Add a streaming Spark workload.
-6. Review Assessment and Summary.
+| Field | Value |
+|---|---|
+| Customer | Woodgrove Bank |
+| Industry | Financial Services |
+| Region | West Europe |
+| Users | 5100 |
+| Peak concurrent users | 620 |
+| Strategy | Coexistence / phased |
+| Outcomes | Modernise risk, finance, fraud, and regulatory analytics with stronger governance and lower data movement. |
+| Constraints | Regulatory evidence, private connectivity, and month-end reporting deadlines are mandatory. |
 
 Expected results:
 
-- Power BI recommends a semantic model with Direct Lake and upstream transformation optimisation.
-- Data Factory exposes connectivity and connector-parity blockers.
-- Spark maps to Real-Time Intelligence, Eventstream, and Fabric Spark.
-- Summary shows capacity pressure because overlap or streaming is present.
+- 16 valid workloads import as a confirmed assessment.
+- 4 are Ready, 8 need Optimisation, and 4 require Redesign.
+- Overall readiness is 64%.
+- The legacy risk model, capital cube, regulatory SQL pool, and SSIS payment integration require redesign.
+- The summary highlights refresh overlap, streaming demand, estate scale, and high concurrency as capacity-watch signals.
 
-## Scenario 6 - Persistence and reset
+## Persistence and reset
 
-1. Import any valid CSV.
-2. Refresh the page.
-3. Confirm the state persists.
-4. Select **Reset** and confirm the imported estate is removed.
+1. Import either CSV and refresh the page.
+2. Confirm the assessment persists.
+3. Select **Reset** and confirm all workloads are removed.
+
+## CSV confirmation fields
+
+The assessed scenarios use these optional fields: `assessment_confirmed`, `refresh_per_day`, `concurrency`, `complexity`, and pipe-delimited `features`. Set `assessment_confirmed=true` only after a CSA has confirmed those facts with the customer.
 
 ## Record feedback
 
-For each scenario, capture browser/version, pass/fail, unexpected behavior, missing question, misleading recommendation, and screenshot. Product-support conclusions still require validation against current Microsoft Learn guidance.
+Use `TEST_RESULTS_TEMPLATE.csv` to capture browser/version, pass/fail, unexpected behavior, missing questions, misleading recommendations, and screenshots. Product-support conclusions still require validation against current Microsoft Learn guidance.

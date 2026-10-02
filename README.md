@@ -87,10 +87,10 @@ after it is saved as CSV; PDF extraction uses the packaged CLI or Copilot
 discovery workflow.
 
 For team testing, share `demo-assets/output/Fabric_Migration_Readiness_Assistant_Team_Test_Bundle.zip`.
-It contains the standalone HTML, a 20-workload manufacturing estate, mixed-quality
-and invalid-header CSVs, expected results, and a feedback template. Its embedded
-assessed sample has 4 Ready, 11 Optimise, and 5 Redesign workloads for 62% readiness.
-Extract the ZIP and open the HTML directly in Edge or Chrome; no installation is required.
+It contains the standalone HTML, valid assessed CSVs for Healthcare and Financial
+Services, expected results, and a feedback template. The scenarios score 66% and
+64% readiness with mixed Ready, Optimise, and Redesign outcomes. Extract the ZIP
+and open the HTML directly in Edge or Chrome; no installation is required.
 
 ## Estate uploads
 

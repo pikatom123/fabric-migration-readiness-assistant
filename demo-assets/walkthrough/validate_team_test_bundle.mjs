@@ -21,40 +21,35 @@ async function upload(fileName) {
 
 await page.goto(appUrl);
 await reset();
-await page.locator("#sampleBtn").click();
-const assessedRows = await page.locator("#workloadRows tr").count();
-const assessedReady = await page.locator("#workloadRows .badge.ready").count();
-const assessedOptimise = await page.locator("#workloadRows .badge.optimize").count();
-const assessedRedesign = await page.locator("#workloadRows .badge.blocked").count();
-const assessedScore = await page.locator("#scoreRing").innerText();
+const healthcareStatus = await upload("Northwind_Healthcare_Assessed_Estate.csv");
+const healthcare = {
+  rows: await page.locator("#workloadRows tr").count(),
+  ready: await page.locator("#workloadRows .badge.ready").count(),
+  optimise: await page.locator("#workloadRows .badge.optimize").count(),
+  redesign: await page.locator("#workloadRows .badge.blocked").count(),
+  discovery: await page.locator("#workloadRows .badge.discovery").count(),
+  score: await page.locator("#scoreRing").innerText()
+};
 
 await reset();
-const largeStatus = await upload("Fabrikam_Manufacturing_Large_Estate.csv");
-const largeRows = await page.locator("#workloadRows tr").count();
-const largeDiscovery = await page.locator("#workloadRows").getByText("Needs Discovery", { exact: true }).count();
+const financeStatus = await upload("Woodgrove_Financial_Services_Assessed_Estate.csv");
+const finance = {
+  rows: await page.locator("#workloadRows tr").count(),
+  ready: await page.locator("#workloadRows .badge.ready").count(),
+  optimise: await page.locator("#workloadRows .badge.optimize").count(),
+  redesign: await page.locator("#workloadRows .badge.blocked").count(),
+  discovery: await page.locator("#workloadRows .badge.discovery").count(),
+  score: await page.locator("#scoreRing").innerText()
+};
 
-await reset();
-const mixedStatus = await upload("Mixed_Quality_Import.csv");
-const mixedRows = await page.locator("#workloadRows tr").count();
-await page.locator('[data-view="workloads"]').click();
-await page.locator("#workloadRows .edit").nth(3).click();
-const markupNotes = await page.locator("#workloadNotes").inputValue();
-await page.locator("#closeDialogBtn").click();
-
-await reset();
-const invalidStatus = await upload("Invalid_Missing_Headers.csv");
-const invalidRows = await page.locator("#workloadRows .edit").count();
-
-const result = { assessedRows, assessedReady, assessedOptimise, assessedRedesign, assessedScore, largeStatus, largeRows, largeDiscovery, mixedStatus, mixedRows, markupRenderedAsText: markupNotes.includes("<script>"), invalidStatus, invalidRows };
+const result = { healthcareStatus, healthcare, financeStatus, finance };
 console.log(JSON.stringify(result, null, 2));
 
 const failures = [];
-if (assessedRows !== 20 || assessedReady !== 4 || assessedOptimise !== 11 || assessedRedesign !== 5 || assessedScore !== "62%") failures.push("mixed assessed sample");
-if (!largeStatus.includes("Imported 20 workloads")) failures.push("large import status");
-if (largeRows !== 20 || largeDiscovery < 20) failures.push("large imported rows");
-if (!mixedStatus.includes("Imported 5 workloads") || !mixedStatus.includes("Skipped rows: 4, 5")) failures.push("mixed import status");
-if (mixedRows !== 5 || !result.markupRenderedAsText) failures.push("mixed imported rows or markup safety");
-if (invalidStatus !== "CSV must contain name and workload_type columns." || invalidRows !== 0) failures.push("invalid-header rejection");
+if (!healthcareStatus.includes("Imported 14 workloads") || !healthcareStatus.includes("confirmed assessment")) failures.push("healthcare import status");
+if (healthcare.rows !== 14 || healthcare.ready !== 4 || healthcare.optimise !== 7 || healthcare.redesign !== 3 || healthcare.discovery !== 0 || healthcare.score !== "66%") failures.push("healthcare assessment mix");
+if (!financeStatus.includes("Imported 16 workloads") || !financeStatus.includes("confirmed assessment")) failures.push("finance import status");
+if (finance.rows !== 16 || finance.ready !== 4 || finance.optimise !== 8 || finance.redesign !== 4 || finance.discovery !== 0 || finance.score !== "64%") failures.push("finance assessment mix");
 
 await browser.close();
 if (failures.length) throw new Error(`Bundle validation failed: ${failures.join(", ")}`);

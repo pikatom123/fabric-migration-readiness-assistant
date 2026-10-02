@@ -1,8 +1,0 @@
-name,workload_type,size_gb,notes
-Quoted notes validation,Power BI,75,"Contains commas, quoted values, and a line that must remain one CSV row"
-Alias normalization check,power-bi,42,"Alias should normalize to Power BI"
-Invalid platform row,Snowflake,900,"Unsupported in the current browser prototype and must be skipped"
-,Azure SQL,250,"Missing workload name and must be skipped"
-Negative size validation,Databricks,-50,"Valid workload type but invalid size should safely become 0 GB"
-Markup safety check,Azure Data Factory,120,"<script>alert('do not execute')</script> must display as text"
-Zero-size workflow,Logic Apps,0,"Zero is valid for a low-data application workflow"

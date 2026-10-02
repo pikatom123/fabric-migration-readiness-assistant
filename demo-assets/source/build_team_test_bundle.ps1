@@ -14,15 +14,6 @@ $htmlPath = Join-Path $stage "Fabric_Migration_Readiness_Assistant.html"
 Copy-Item (Join-Path $root "index.html") $htmlPath
 Copy-Item (Join-Path $scenarioSource "*") $stage
 
-$html = [IO.File]::ReadAllText($htmlPath)
-$assessedState = [IO.File]::ReadAllText((Join-Path $scenarioSource "Fabrikam_Mixed_Assessed_State.json")).Trim()
-$pattern = 'const sampleState = \{.*?\r?\n    \};\r?\n    let state'
-$replacement = "const sampleState = $assessedState;`r`n    let state"
-$packagedHtml = [regex]::Replace($html, $pattern, $replacement, [Text.RegularExpressions.RegexOptions]::Singleline)
-if ($packagedHtml -eq $html) { throw "Could not inject the assessed test state into the packaged HTML." }
-$packagedHtml = $packagedHtml.Replace('id="sampleBtn">Load sample</button>', 'id="sampleBtn">Load assessed sample</button>')
-[IO.File]::WriteAllText($htmlPath, $packagedHtml, [Text.UTF8Encoding]::new($false))
-
 $version = @(
     "Fabric Migration Readiness Assistant - Team Test Bundle"
     "Built: $((Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'))"

@@ -429,7 +429,7 @@
             <div>
               <h3>Bring your estate inventory</h3>
               <p>Import a CSV inventory now, or select a PDF for conversational review. Imported facts remain <strong>Needs Discovery</strong> until you confirm the workload-specific questions.</p>
-              <div class="upload-status" id="uploadStatus" role="status">CSV columns: name, workload_type, size_gb, notes. PDF extraction uses the packaged CLI or Copilot skill.</div>
+              <div class="upload-status" id="uploadStatus" role="status">CSV inventory columns: name, workload_type, size_gb, notes. Confirmed test assessments may also include assessment_confirmed, refresh_per_day, concurrency, complexity, and features.</div>
             </div>
             <div>
               <input class="hide" id="estateUpload" type="file" accept=".csv,.pdf,text/csv,application/pdf">
@@ -893,6 +893,10 @@
           return;
         }
         const sizeIndex = headers.indexOf("size_gb"), notesIndex = headers.indexOf("notes");
+        const confirmedIndex = headers.indexOf("assessment_confirmed");
+        const refreshIndex = headers.indexOf("refresh_per_day"), concurrencyIndex = headers.indexOf("concurrency");
+        const complexityIndex = headers.indexOf("complexity"), featuresIndex = headers.indexOf("features");
+        const validFeatures = new Set(FEATURES.map(([id]) => id));
         const imported = [], skipped = [];
         rows.forEach((row, index) => {
           const name = String(row[nameIndex] || "").trim();
@@ -900,17 +904,26 @@
           const rawSize = sizeIndex >= 0 ? String(row[sizeIndex] || "").trim() : "";
           const size = rawSize && Number.isFinite(Number(rawSize)) && Number(rawSize) >= 0 ? Number(rawSize) : 0;
           if (!name || !type) { skipped.push(index + 2); return; }
+          const confirmed = confirmedIndex >= 0 && ["true","yes","1"].includes(String(row[confirmedIndex] || "").trim().toLowerCase());
+          const numberAt = columnIndex => columnIndex >= 0 && Number.isFinite(Number(row[columnIndex])) && Number(row[columnIndex]) >= 0 ? Number(row[columnIndex]) : 0;
+          const complexity = complexityIndex >= 0 && ["Low","Medium","High"].includes(String(row[complexityIndex] || "").trim()) ? String(row[complexityIndex]).trim() : "Unknown";
+          const features = featuresIndex >= 0 ? String(row[featuresIndex] || "").split("|").map(value => value.trim()).filter(value => validFeatures.has(value)) : [];
           imported.push({
-            id:`import-${Date.now()}-${index}`, name, type, size, refresh:0, concurrency:0,
-            complexity:"Unknown", features:[], notes:notesIndex >= 0 ? String(row[notesIndex] || "").trim() : "",
-            discoveryPending:true, sourceFile:file.name
+            id:`import-${Date.now()}-${index}`, name, type, size, refresh:numberAt(refreshIndex), concurrency:numberAt(concurrencyIndex),
+            complexity, features, notes:notesIndex >= 0 ? String(row[notesIndex] || "").trim() : "",
+            discoveryPending:!confirmed, sourceFile:file.name
           });
         });
         state.workloads.push(...imported);
         state.imports = [...(state.imports || []), {name:file.name,type:"csv",count:imported.length}];
         saveState(); renderAll();
         status.className = skipped.length ? "upload-status error" : "upload-status";
-        status.textContent = `Imported ${imported.length} workload${imported.length === 1 ? "" : "s"} from ${file.name} as Needs Discovery.${skipped.length ? ` Skipped rows: ${skipped.join(", ")}.` : ""}`;
+        const confirmedCount = imported.filter(workload => !workload.discoveryPending).length;
+        const discoveryCount = imported.length - confirmedCount;
+        const disposition = confirmedCount && discoveryCount
+          ? `${confirmedCount} confirmed for assessment and ${discoveryCount} as Needs Discovery`
+          : confirmedCount ? "as a confirmed assessment" : "as Needs Discovery";
+        status.textContent = `Imported ${imported.length} workload${imported.length === 1 ? "" : "s"} from ${file.name} ${disposition}.${skipped.length ? ` Skipped rows: ${skipped.join(", ")}.` : ""}`;
       };
       reader.readAsText(file);
     }

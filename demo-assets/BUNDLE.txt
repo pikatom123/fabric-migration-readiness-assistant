@@ -8,7 +8,7 @@ START HERE
 
 TEAM TESTING
 - Share output/Fabric_Migration_Readiness_Assistant_Team_Test_Bundle.zip.
-- It includes the standalone HTML, a 20-workload mixed assessment at 62% readiness, guarded negative cases, expected results, and a feedback template.
+- It includes the standalone HTML, valid Healthcare and Financial Services assessed CSVs at 66% and 64% readiness, expected results, and a feedback template.
 - Recipients extract the ZIP and open Fabric_Migration_Readiness_Assistant.html directly in Edge or Chrome.
 
 DEMO INPUTS

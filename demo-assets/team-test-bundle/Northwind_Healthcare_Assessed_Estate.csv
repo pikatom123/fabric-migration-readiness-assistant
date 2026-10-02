@@ -1,0 +1,15 @@
+name,workload_type,size_gb,notes,assessment_confirmed,refresh_per_day,concurrency,complexity,features
+Clinical operations semantic model,Power BI,140,Confirmed supported semantic model for clinical operations,true,12,180,Medium,
+Patient outcomes analytics,Power BI,220,Calculated columns should move into the curated Gold layer,true,8,120,Medium,calculated-columns
+Legacy activity-based costing cube,SSAS,680,Confirmed MDX and writeback dependency requires replacement design,true,1,35,High,unsupported-model
+Population health analytics workspace,Synapse,6400,Separate SQL Spark and orchestration concerns during migration,true,12,65,Medium,private-network
+Research analytics replica,Azure SQL,950,Confirmed analytical replica with supported relational design,true,24,55,Medium,
+Electronic health record replica,Azure SQL,2800,CDC and source impact require compatibility validation,true,1440,95,Medium,cdc|private-network
+Genomics feature engineering,Databricks,9200,Custom runtime and libraries favour governed coexistence first,true,6,24,High,custom-libraries|private-network
+Reference data ingestion,Azure Data Factory,620,Standard connectors and pipeline activities confirmed,true,24,6,Medium,
+Hospital integration factory,ADF,4100,On-premises clinical systems currently depend on SHIR,true,96,18,High,self-hosted-ir|private-network
+Claims enrichment jobs,Spark jobs,3600,Standard batch Spark workload with supported libraries,true,4,14,Medium,
+Remote monitoring stream,Spark,7800,Sub-minute telemetry requires streaming benchmark and retention design,true,1440,28,Medium,streaming
+Care pathway notifications,Logic Apps,10,Retain application workflow and invoke Fabric for data processing,true,240,15,Medium,
+Clinical trial approvals,Azure Logic Apps,6,Human approvals callbacks and long-running state remain outside Fabric pipelines,true,60,8,High,stateful
+Platform compliance automation,Azure Automation,3,Retain control-plane automation and call Fabric APIs,true,24,3,Low,

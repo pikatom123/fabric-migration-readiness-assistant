@@ -1,0 +1,17 @@
+name,workload_type,size_gb,notes,assessment_confirmed,refresh_per_day,concurrency,complexity,features
+Retail banking executive model,Power BI,175,Confirmed supported model and security design,true,12,260,Medium,
+Profitability semantic model,Power BI,310,Composite model and calculated columns need optimisation,true,8,190,Medium,calculated-columns|composite-model|high-overlap
+Legacy risk reporting model,Power BI,460,Confirmed unsupported semantic-model behaviour requires redesign,true,4,85,High,unsupported-model
+Treasury planning tabular model,SSAS,720,Tabular migration with transformation pushdown opportunity,true,1,45,High,calculated-columns
+Capital planning cube,Azure Analysis Services,1180,Writeback and MDX dependencies require replacement design,true,1,55,High,unsupported-model
+Enterprise risk analytics,Synapse,8800,Workload separation and private topology validation required,true,18,75,High,private-network
+Regulatory reporting SQL pool,Azure Synapse,5200,Dedicated-pool feature dependency requires redesign,true,6,60,High,unsupported-model
+Fraud analytics replica,Azure SQL,2400,Confirmed analytical replica candidate,true,1440,140,Medium,
+Core banking change feed,Azure SQL,3900,CDC compatibility and replication latency require validation,true,1440,110,Medium,cdc|private-network
+Credit decision feature engineering,Databricks,12600,Custom libraries and ML lifecycle favour governed coexistence,true,10,30,High,custom-libraries
+Market reference ingestion,Azure Data Factory,850,Standard connectors and pipeline activities confirmed,true,48,8,Medium,
+Legacy payment integration,ADF,3400,SSIS execution cannot migrate as-is to Fabric pipelines,true,96,20,High,ssis|private-network
+Liquidity calculation jobs,Spark jobs,4700,Standard batch workload with supported runtime,true,4,18,Medium,
+Fraud event scoring,Spark,9800,Streaming latency checkpointing and capacity require benchmarking,true,1440,35,Medium,streaming
+Customer due-diligence workflow,Logic Apps,8,Retain application workflow and invoke Fabric for data tasks,true,180,12,Medium,
+Regulatory evidence automation,Automation runbooks,4,Retain administration workflow with source control and monitoring,true,24,4,Low,manual-ops

@@ -1,0 +1,16 @@
+name,workload_type,size_gb,notes,assessment_confirmed,refresh_per_day,concurrency,complexity,features
+Grid operations executive model,Power BI,190,Confirmed supported semantic model and security design,true,12,240,Medium,
+Asset health analytics,Power BI,280,Calculated columns and peak refresh overlap need optimisation,true,24,180,Medium,calculated-columns|high-overlap
+Legacy generation reporting model,Power BI,510,Confirmed unsupported model feature requires redesign,true,6,75,High,unsupported-model
+Energy trading planning model,SSAS,840,Tabular migration with transformation pushdown opportunity,true,1,50,High,calculated-columns
+Enterprise meter analytics,Synapse,9800,Separate SQL Spark and orchestration concerns during migration,true,24,90,High,private-network
+Regulatory settlement SQL pool,Azure Synapse,6100,Dedicated-pool feature dependency requires redesign,true,8,65,High,unsupported-model
+Customer billing analytics replica,Azure SQL,2700,Confirmed analytical replica candidate,true,24,105,Medium,
+Smart meter change feed,Azure SQL,4500,CDC compatibility and replication latency require validation,true,1440,125,Medium,cdc|private-network
+Renewable forecasting features,Databricks,11200,Custom libraries and ML lifecycle favour governed coexistence,true,12,28,High,custom-libraries
+Market reference ingestion,Azure Data Factory,980,Standard connectors and pipeline activities confirmed,true,48,10,Medium,
+Field telemetry integration,ADF,5200,Custom connector and SHIR dependencies prevent as-is migration,true,144,22,High,self-hosted-ir|custom-connector|private-network
+Network loss calculation jobs,Spark jobs,4300,Standard batch Spark workload with supported runtime,true,6,16,Medium,
+Smart meter event stream,Spark,13800,Streaming latency checkpointing retention and capacity require benchmarking,true,1440,40,Medium,streaming
+Outage response approvals,Logic Apps,9,Human approvals callbacks and long-running state remain outside Fabric pipelines,true,120,14,High,stateful
+Platform operations automation,Automation runbooks,4,Retain administration workflow with source control and monitoring,true,24,4,Low,manual-ops

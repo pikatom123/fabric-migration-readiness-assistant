@@ -62,6 +62,31 @@ Expected results:
 - The legacy risk model, capital cube, regulatory SQL pool, and SSIS payment integration require redesign.
 - The summary highlights refresh overlap, streaming demand, estate scale, and high concurrency as capacity-watch signals.
 
+## Scenario 3 - Contoso Energy & Utilities
+
+File: `Contoso_Energy_Utilities_Assessed_Estate.csv`
+
+Suggested customer context:
+
+| Field | Value |
+|---|---|
+| Customer | Contoso Energy |
+| Industry | Energy & Utilities |
+| Region | North Europe |
+| Users | 3400 |
+| Peak concurrent users | 410 |
+| Strategy | Coexistence / phased |
+| Outcomes | Modernise grid, meter, trading, forecasting, and regulatory analytics while improving near-real-time visibility. |
+| Constraints | Critical grid operations, private connectivity, regulatory settlement deadlines, and uninterrupted telemetry ingestion are mandatory. |
+
+Expected results:
+
+- 15 valid workloads import as a confirmed assessment.
+- 4 are Ready, 7 need Optimisation, and 4 require Redesign.
+- Overall readiness is 64%.
+- The generation reporting model, settlement SQL pool, field telemetry integration, and outage approvals require redesign.
+- Streaming demand, large estate size, high concurrency, and refresh overlap produce a capacity-watch signal.
+
 ## Persistence and reset
 
 1. Import either CSV and refresh the page.

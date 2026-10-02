@@ -86,6 +86,11 @@ the file index and live-demo sequence. The browser accepts the Excel inventory
 after it is saved as CSV; PDF extraction uses the packaged CLI or Copilot
 discovery workflow.
 
+For team testing, share `demo-assets/output/Fabric_Migration_Readiness_Assistant_Team_Test_Bundle.zip`.
+It contains the standalone HTML, a 20-workload manufacturing estate, mixed-quality
+and invalid-header CSVs, expected results, and a feedback template. Extract the ZIP
+and open the HTML directly in Edge or Chrome; no installation is required.
+
 ## Estate uploads
 
 The Discovery screen in `index.html` includes an **Upload PDF or CSV** button.

@@ -6,6 +6,11 @@ START HERE
 2. Play output/Fabric_Migration_Readiness_Assistant_2min_Demo.mp4 for the full-screen prototype walkthrough.
 3. Use output/Fabric_Migration_Readiness_Assistant_Demo_Script.txt for the live-demo runbook and narration.
 
+TEAM TESTING
+- Share output/Fabric_Migration_Readiness_Assistant_Team_Test_Bundle.zip.
+- It includes the standalone HTML, a 20-workload manufacturing scenario, guarded negative cases, expected results, and a feedback template.
+- Recipients extract the ZIP and open Fabric_Migration_Readiness_Assistant.html directly in Edge or Chrome.
+
 DEMO INPUTS
 - output/Contoso_Estate_Inventory.xlsx
   Customer inventory template for Excel. Save/export as CSV before browser upload.
@@ -30,3 +35,4 @@ REBUILDING
 4. Run node demo-assets/walkthrough/capture_roadmap.mjs to render the closing frame.
 5. Run demo-assets/source/generate_narration.ps1.
 6. Run demo-assets/source/build_video.ps1; FFmpeg is discovered from PATH or Winget.
+7. Run demo-assets/source/build_team_test_bundle.ps1 to rebuild the shareable test ZIP.

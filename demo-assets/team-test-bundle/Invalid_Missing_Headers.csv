@@ -1,0 +1,2 @@
+workload,platform,data_size,description
+Header validation test,Power BI,100,This file must be rejected because required headers are absent
